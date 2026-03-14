@@ -1,5 +1,5 @@
 """
-Détection de Maladies de Plantes - AlexNet
+Détection de Maladies de Plantes - AlexNet ne pas utiliser que squelette
 3 classes : 
 """
 
