@@ -16,7 +16,7 @@ from PIL import Image
 
 #   À MODIFIER
 
-TRAIN_DIR  = "/net/cremi/llorella/Bureau/train"   # ← votre dossier contenant les .png
+TRAIN_DIR  = "/net/cremi/llorella/Bureau/train"   # dossier contenant les .png
 
 EPOCHS     = 25
 BATCH_SIZE = 32
@@ -121,6 +121,6 @@ torch.save(model.state_dict(), "models/alexnet_best.pth")
 with open("models/class_names.json", "w") as f:
     json.dump(CLASSES, f)
 
-print("\n✅ Terminé.")
+print("\n Terminé.")
 print("   Modèle  → models/alexnet_best.pth")
 print("   Classes → models/class_names.json")

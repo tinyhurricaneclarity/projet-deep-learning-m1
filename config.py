@@ -7,7 +7,7 @@ ROOT = "/home/mona/Documents/Projet/beyond-visible-spectrum-ai-for-agriculture-2
 TRAIN_DIR = "train"
 
 # Taille à laquelle on redimensionne les images (224x224 est la taille standard pour AlexNet)
-IMG_SIZE = 224
+IMG_SIZE = 64
 
 # Nombre d'images traitées en même temps pendant l'entraînement
 BATCH_SIZE = 32
