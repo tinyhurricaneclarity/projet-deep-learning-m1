@@ -17,7 +17,7 @@ import torchvision.transforms as transforms
 import torch.optim as optim
 from sklearn.metrics import f1_score, confusion_matrix
 
-# ---- FONCTIONS (de Léa et Maël) ----
+# --- FONCTIONS (Léa et Maël) ---
 
 def pourcent_to_prop(pourcent):
     """
@@ -96,7 +96,7 @@ def import_images(class_names, dico, tr_or_te="none"):
     return {"images": np.array(images), "labels": labels}
 
 
-# ---- TRANSFORMATIONS ----
+# --- TRANSFORMATIONS ---
 
 # Pour le train : avec data augmentation
 train_transform = transforms.Compose([
@@ -116,7 +116,7 @@ eval_transform = transforms.Compose([
 ])
 
 
-# ---- DATASET ----
+# --- DATASET ---
 
 class CustomImageDataset(Dataset):
     def __init__(self, images, labels, transform=None):
@@ -135,7 +135,7 @@ class CustomImageDataset(Dataset):
         return image, label
 
 
-# ---- ARCHITECTURE CONVNET ----
+# --- ARCHITECTURE CONVNET ---
 
 class ConvNet(nn.Module):
     """
@@ -177,7 +177,7 @@ class ConvNet(nn.Module):
         return x
 
 
-# ---- CHOIX DES INPUTS ----
+# --- CHOIX DES INPUTS ---
 
 class_names           = ["Health", "Rust", "Other"]
 Im_type               = "RGB"
@@ -206,7 +206,7 @@ print(f"Train : {len(Train['images'])} images")
 print(f"Val   : {len(Val['images'])} images")
 print(f"Test  : {len(Test['images'])} images")
 
-# ---- HISTOGRAMME des classes ----
+# --- HISTOGRAMME des classes ---
 counts = Counter(Train['labels'])
 values = [counts[0], counts[1], counts[2]]
 plt.figure(figsize=(6, 4))
@@ -217,7 +217,7 @@ plt.ylabel("Nombre d'images")
 plt.savefig("histogramme_classes.png")
 print("Histogramme sauvegardé dans histogramme_classes.png")
 
-# ---- DATASETS ET DATALOADERS ----
+# --- DATASETS et DATALOADERS ---
 batch_size    = 32
 num_epochs    = 50
 learning_rate = 0.001
@@ -230,7 +230,7 @@ train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader   = DataLoader(val_dataset,   batch_size=batch_size, shuffle=False)
 test_loader  = DataLoader(test_dataset,  batch_size=batch_size, shuffle=False)
 
-# ---- MODELE ----
+# --- MODELE ---
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Device :", device)
 
@@ -238,7 +238,7 @@ model     = ConvNet(num_classes=len(class_names)).to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-# ---- ENTRAINEMENT ----
+# --- ENTRAINEMENT ---
 train_losses     = []
 val_losses       = []
 train_accuracies = []
@@ -307,9 +307,9 @@ for epoch in range(1, num_epochs + 1):
         torch.save(model.state_dict(), "saved_models/convnet_best.pth")
         print(f"  -> Meilleur modèle sauvegardé à l'epoch {epoch} (Val Loss: {val_loss:.4f})")
 
-# ---- EVALUATION SUR LE JEU DE TEST ----
+# --- EVALUATION SUR LE JEU DE TEST ---
 # On charge le meilleur modèle sauvegardé
-print("\nChargement du meilleur modèle...")
+print("\nChargement du meilleur modèle")
 model.load_state_dict(torch.load("saved_models/convnet_best.pth"))
 
 print("Evaluation sur le jeu de test.")
@@ -332,7 +332,7 @@ print(f"F1-score macro : {f1:.4f}")
 print("Matrice de confusion :")
 print(cm)
 
-# ---- COURBES ----
+# --- COURBES ---
 epochs = range(1, num_epochs + 1)
 
 plt.figure(figsize=(10, 4))
