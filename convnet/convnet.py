@@ -193,7 +193,7 @@ proportion_train      = pourcent_to_prop(proportion_train)
 proportion_validation = pourcent_to_prop(proportion_validation)
 proportion_test       = pourcent_to_prop(proportion_test)
 
-# Fabrication du split aléatoire
+# Split aléatoire
 dico_train_test = alea_train_test(Num_data, class_names)
 sufix_and_path(Im_type, dico_train_test, path)
 
