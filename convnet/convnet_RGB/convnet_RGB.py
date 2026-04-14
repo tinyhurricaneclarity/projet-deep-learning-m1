@@ -1,16 +1,17 @@
-# convnet.py
+# convnet_RGB.py
 # ConvNet from scratch sur images RGB 64x64
 
-# Objectif : entraîner un réseau de neurones convolutif (ConvNet) from scratch
-# sur les images RGB du dataset Kaggle "Beyond Visible Spectrum".
+# Objectif : entraîner un réseau de neurones convolutif (ConvNet) from scratch sur les images RGB du dataset Kaggle "Beyond Visible Spectrum".
 # Le modèle doit classifier les images en 3 classes : Health, Rust, Other.
 
 # Améliorations apportées :
-# - Data augmentation (flip, rotation) pour réduire l'overfitting
-# - Sauvegarde du meilleur modèle basée sur la val loss
-# - 50 epochs pour laisser le temps au modèle d'apprendre
-# - Tirage au sort à l'intérieur de chaque classe pour l'équilibre
+# - Data augmentation dynamique (flips, rotation) pour réduire l'overfitting
+# - Tirage au sort à l'intérieur de chaque classe pour l'équilibre dans chaque sous-ensemble (train, val, test)
 # - Val : 99 images (33 par classe), Test : 99 images (33 par classe)
+# - 100 epochs pour laisser le temps au modèle d'apprendre
+# - Learning rate scheduler qui réduit automatiquement le learning rate quand la val loss stagne
+# - Sauvegarde du meilleur modèle basée sur la val loss
+# - F1-score par classe pour identifier quelle classe sous-performe
 
 
 
