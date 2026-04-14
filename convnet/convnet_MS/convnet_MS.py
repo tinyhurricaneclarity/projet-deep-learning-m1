@@ -1,13 +1,12 @@
 # convnet_MS.py
 # ConvNet from scratch sur images MS 64x64
 
-# Objectif : entraîner un réseau de neurones convolutif (ConvNet) from scratch
-# sur les images MS du dataset Kaggle "Beyond Visible Spectrum".
+# Objectif : entraîner un réseau de neurones convolutif (ConvNet) from scratch sur les images MS du dataset.
 # Le modèle doit classifier les images en 3 classes : Health, Rust, Other
 
 # Améliorations apportées :
 # - Data augmentation dynamique (flips, rotation)
-# - Tirage au sort à l'intérieur de chaque classe pour garantir l'équilibre
+# - Tirage au sort à l'intérieur de chaque classe pour l'équilibre
 # - Val : 99 images (33 par classe), Test : 99 images (33 par classe)
 # - 100 epochs
 # - Learning rate scheduler (ReduceLROnPlateau)
