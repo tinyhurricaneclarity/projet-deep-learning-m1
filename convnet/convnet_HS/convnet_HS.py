@@ -1,7 +1,7 @@
-# convnet_MS.py
+# convnet_HS.py
 # ConvNet from scratch sur images HS 32x32
 
-# Objectif : entraîner un réseau de neurones convolutif (ConvNet) from scratch sur les images MS du dataset.
+# Objectif : entraîner un réseau de neurones convolutif (ConvNet) from scratch sur les images HS du dataset.
 # Le modèle doit classifier les images en 3 classes : Health, Rust, Other
 
 # Améliorations apportées :
@@ -75,7 +75,7 @@ def sufix_and_path(Im_type, dico, path):
             dico["path_data"] = f"{path}/HS"
         else:
             print("Forme inconnue")
-
+            
 
 def import_images(class_names, dico, tr_or_te="train"):
     images = []
@@ -84,9 +84,18 @@ def import_images(class_names, dico, tr_or_te="train"):
     for (j, i) in indices:
         tpr_path = f"{dico['path_data']}/{class_names[j]}_hyper_{i}{dico['sufix']}"
         img = ski.io.imread(tpr_path)
-        img = img.astype(np.float32)  # conversion en float32
-        # normalisation entre 0 et 1
+        img = img.astype(np.float32)
         img = (img - img.min()) / (img.max() - img.min() + 1e-6)
+        
+        # Force 125 canaux : certaines images HS peuvent avoir un nombre différent
+        if img.shape[2] < 125:
+            # padding avec des zéros si moins de 125 canaux
+            pad = np.zeros((32, 32, 125 - img.shape[2]), dtype=np.float32)
+            img = np.concatenate([img, pad], axis=2)
+        elif img.shape[2] > 125:
+            # coupe si plus de 125 canaux
+            img = img[:, :, :125]
+        
         images.append(img)
         labels.append(j)
     return {"images": np.array(images), "labels": labels}
@@ -94,22 +103,18 @@ def import_images(class_names, dico, tr_or_te="train"):
 
 ### TRANSFORMATIONS DES IMAGES
 
-# Pour le train : avec data augmentation dynamique
-# Les images MS ont 5 canaux donc la normalisation utilise 5 valeurs
+# Les images HS ont 125 canaux
 train_transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.RandomHorizontalFlip(),
     transforms.RandomVerticalFlip(),
     transforms.RandomRotation(15),
-    transforms.Normalize(mean=[0.5, 0.5, 0.5, 0.5, 0.5],
-                         std=[0.5, 0.5, 0.5, 0.5, 0.5])
+    transforms.Normalize(mean=[0.5] * 125, std=[0.5] * 125)
 ])
 
-# Pour val et test : sans augmentation
 eval_transform = transforms.Compose([
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5, 0.5, 0.5, 0.5, 0.5],
-                         std=[0.5, 0.5, 0.5, 0.5, 0.5])
+    transforms.Normalize(mean=[0.5] * 125, std=[0.5] * 125)
 ])
 
 
@@ -136,15 +141,15 @@ class CustomImageDataset(Dataset):
 
 class ConvNet(nn.Module):
     """
-    ConvNet from scratch adapté aux images MS 64x64.
-    Les images MS ont 5 canaux (au lieu de 3 pour le RGB).
+    ConvNet from scratch adapté aux images HS 32x32.
+    Les images HS ont 125 canaux et une taille de 32x32 pixels.
     3 blocs convolutifs + couches fully connected.
     """
     def __init__(self, num_classes=3):
         super(ConvNet, self).__init__()
 
-        # Bloc 1 : 5 canaux en entrée (MS) au lieu de 3 (RGB)
-        self.conv1 = nn.Conv2d(5, 32, kernel_size=3, padding=1)
+        # Bloc 1 : 125 canaux en entrée (HS)
+        self.conv1 = nn.Conv2d(125, 32, kernel_size=3, padding=1)
         self.bn1   = nn.BatchNorm2d(32)
 
         # Bloc 2
@@ -159,14 +164,14 @@ class ConvNet(nn.Module):
         self.dropout = nn.Dropout(0.3)
         self.relu    = nn.ReLU()
 
-        # après 3 maxpoolings sur 64x64 : 64/2/2/2 = 8
-        self.fc1 = nn.Linear(128 * 8 * 8, 256)
+        # après 3 maxpoolings sur 32x32 : 32/2/2/2 = 4
+        self.fc1 = nn.Linear(128 * 4 * 4, 256)
         self.fc2 = nn.Linear(256, num_classes)
 
     def forward(self, x):
-        x = self.pool(self.relu(self.bn1(self.conv1(x))))  # -> 32x32
-        x = self.pool(self.relu(self.bn2(self.conv2(x))))  # -> 16x16
-        x = self.pool(self.relu(self.bn3(self.conv3(x))))  # -> 8x8
+        x = self.pool(self.relu(self.bn1(self.conv1(x))))  # -> 16x16
+        x = self.pool(self.relu(self.bn2(self.conv2(x))))  # -> 8x8
+        x = self.pool(self.relu(self.bn3(self.conv3(x))))  # -> 4x4
         x = torch.flatten(x, 1)
         x = self.dropout(x)
         x = self.relu(self.fc1(x))
@@ -178,7 +183,7 @@ class ConvNet(nn.Module):
 ### CHOIX DES INPUTS ET PARAMETRES
 
 class_names = ["Health", "Rust", "Other"]
-Im_type     = "MS"
+Im_type     = "HS"
 Num_data    = 600
 
 path = "/home/mona/Documents/Projet/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train"
@@ -213,8 +218,8 @@ for ax, data, title, color in zip(
     ax.set_ylabel("Nombre d'images")
 
 plt.tight_layout()
-plt.savefig("histogrammes_complets_MS.png")
-print("Histogrammes sauvegardés dans histogrammes_complets_MS.png")
+plt.savefig("histogrammes_complets_HS.png")
+print("Histogrammes sauvegardés dans histogrammes_complets_HS.png")
 
 
 ### HYPERPARAMETRES
@@ -319,14 +324,14 @@ for epoch in range(1, num_epochs + 1):
 
     if val_loss < best_val_loss:
         best_val_loss = val_loss
-        torch.save(model.state_dict(), "saved_models/convnet_MS_best.pth")
+        torch.save(model.state_dict(), "saved_models/convnet_HS_best.pth")
         print(f"  -> Meilleur modèle sauvegardé à l'epoch {epoch} (Val Loss: {val_loss:.4f})")
 
 
 ### EVALUATION FINALE SUR LE JEU DE TEST
 
 print("\nChargement du meilleur modèle.")
-model.load_state_dict(torch.load("saved_models/convnet_MS_best.pth"))
+model.load_state_dict(torch.load("saved_models/convnet_HS_best.pth"))
 
 print("Evaluation sur le jeu de test.")
 model.eval()
@@ -363,19 +368,19 @@ plt.plot(epochs, train_losses, label='Train Loss', marker='o')
 plt.plot(epochs, val_losses,   label='Val Loss',   marker='o')
 plt.xlabel("Epoch")
 plt.ylabel("Loss")
-plt.title("Courbe de loss - ConvNet MS")
+plt.title("Courbe de loss - ConvNet HS")
 plt.legend()
-plt.savefig("loss_convnet_MS.png")
-print("Courbe de loss sauvegardée dans loss_convnet_MS.png")
+plt.savefig("loss_convnet_HS.png")
+print("Courbe de loss sauvegardée dans loss_convnet_HS.png")
 
 plt.figure(figsize=(10, 4))
 plt.plot(epochs, train_accuracies, label='Train Accuracy', marker='o')
 plt.plot(epochs, val_accuracies,   label='Val Accuracy',   marker='o')
 plt.xlabel("Epoch")
 plt.ylabel("Accuracy")
-plt.title("Courbe d'accuracy - ConvNet MS")
+plt.title("Courbe d'accuracy - ConvNet HS")
 plt.legend()
-plt.savefig("accuracy_convnet_MS.png")
-print("Courbe d'accuracy sauvegardée dans accuracy_convnet_MS.png")
+plt.savefig("accuracy_convnet_HS.png")
+print("Courbe d'accuracy sauvegardée dans accuracy_convnet_HS.png")
 
 print("\nTerminé.")
