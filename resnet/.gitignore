@@ -7,5 +7,5 @@ __pycache__/
 .DS_Store
 
 # Ne pas envoyer les fichiers contenus dans data sur github en laissant apparent le dossier
-data/* #ignore tout le contenu
-!data/.gitkeep #sauf ce fichier
+data/* 
+!data/.gitkeep 
