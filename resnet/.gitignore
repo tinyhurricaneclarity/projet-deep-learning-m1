@@ -1,0 +1,7 @@
+# environnement virtuel
+venv/
+# fichiers Python inutiles
+__pycache__/
+*.pyc
+# fichiers système
+.DS_Store
