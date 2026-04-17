@@ -94,10 +94,9 @@ class ResNet18(nn.Module): #de geeksforgeeks
         out = self.layer4(out)
 
         out = self.avgpool(out)
-        out = out.view(out.size(0), -1)
+        out = out.view(out.size(0), -1) #flatten (tensor → vecteur)
         out = self.fc(out)
         return out
-
 
 
 #### Version chat : différence dans les strides. 
@@ -142,7 +141,6 @@ class BasicBlock(nn.Module):
         out += self.shortcut(x)
         out = self.relu(out)
         return out
-
 
 
 class ResNet18(nn.Module): 
