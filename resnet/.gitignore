@@ -1,0 +1,11 @@
+# environnement virtuel
+venv/
+# fichiers Python inutiles
+__pycache__/
+*.pyc
+# fichiers système
+.DS_Store
+
+# Ne pas envoyer les fichiers contenus dans data sur github en laissant apparent le dossier
+data/* 
+!data/.gitkeep 
