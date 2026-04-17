@@ -33,7 +33,6 @@ resnet/
 │   └── exploration.ipynb
 │
 ├── src/
-│   ├── data_loading.py
 │   ├── dataset.py
 │   ├── model.py
 │   ├── train.py
@@ -43,6 +42,7 @@ resnet/
 │   ├── figures/
 │   ├── models/
 │
+├── main.py
 ├── requirements.txt
 ├── README.md
 └── .gitignore

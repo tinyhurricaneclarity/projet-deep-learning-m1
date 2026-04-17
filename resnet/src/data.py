@@ -48,17 +48,3 @@ def load_data_test(path_test_rgb):
 x_test = load_data_test(path_test_rgb)
 print("Nombre images test:", len(x_test)) #300
 
-#Visualiser les images
-
-labels = ["Health", "Other", "Rust"]
-
-fig, axes = plt.subplots(4, 4, figsize=(10, 10))
-
-for i, ax in enumerate(axes.flatten()): #axes.flatten() → transforme la grille en liste : [axes[0,0], axes[0,1], axes[1,0], axes[1,1]]
-  img = x_train[i]
-  ax.imshow(img)
-  ax.set_title(labels[y_train[i]])
-
-
-plt.tight_layout() #pour ajuster les tailles des images et éviter qu'elles se chevauchent
-plt.show()
