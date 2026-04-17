@@ -13,7 +13,7 @@ Les images sont prises par un drone : DJI M600 Pro UAV with an S185 snapshot hyp
 
 # Arborescence
 
-'''
+```
 resnet/
 │
 ├── data/
@@ -45,4 +45,4 @@ resnet/
 ├── requirements.txt
 ├── README.md
 └── .gitignore
-'''
+```
