@@ -2,47 +2,192 @@
 import torch
 import torch.nn as nn
 
-#Premier bloc résiduel simple (pas resnet18) pour comprendre
-class ResidualBlock(nn.Module): #hérite de module
-    def __init__(self, in_channels, out_channels, kernel_size=3, activation=nn.ReLU(inplace=True), use_batchnorm=True):
-        super(ResidualBlock, self).__init__()
-         #données des couches de convolution :
-         # canaux entrée et sortie
-         # taille de kernel par défaut 3 on peut le modifier,
-         # "acitvation" est la fonction d'activation. ici reLU (il y en a d'autres) empêche le problème du vanishing gradient, surtout pour les réseaux profonds.
-         # batch_norm : permet de normaliser les données sortant de la couche de convolution pour éviter d'avoir des données trop dispersées
 
-        padding = kernel_size // 2 #pour garder les dimensions constantes
+# Bloc résiduel resnet18 de geeksforgeeks
 
-        #première couche de convolution
-        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, padding=padding, bias=not use_batchnorm)
-        self.bn1 = nn.BatchNorm2d(out_channels) if use_batchnorm else nn.Identity()
+class BasicBlock(nn.Module): 
+    def __init__(self, in_channels, out_channels, stride=1): #stride
+        super(BasicBlock, self).__init__()
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(out_channels)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False)
+        self.bn2 = nn.BatchNorm2d(out_channels)
 
-        # deuxième couche convolution (meme chose que premiere)
-        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=kernel_size, padding=padding, bias=not use_batchnorm)
-        self.bn2 = nn.BatchNorm2d(out_channels) if use_batchnorm else nn.Identity()
+        self.shortcut = nn.Sequential() #par défaut ne fait rien
 
-        #définition de la fonction d'activation
-        self.activation = activation
+        #dans le cas ou l'input n'est pas de la meme taille que l'output, on applique la séquence (sequential) suivante :
+        if stride != 1 or in_channels != out_channels:
+            self.shortcut = nn.Sequential(
+                nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm2d(out_channels)
+            )
 
-        #pour vérifier qu'il n'y a pas de problèmes
-        if in_channels != out_channels:
-            self.shortcut = nn.Conv2d(in_channels, out_channels, kernel_size=1en , bias=False)
-        else:
-            self.shortcut = nn.Identity()
-
-    #Faire passer toutes les données jusqu'à la fin (voir fonctionnement resnet)
     def forward(self, x):
-        shortcut = self.shortcut(x) #shortcut est la donnée à la fin du bloc résiduel
-
-        #on fait passer nos données à travers chaque couche
         out = self.conv1(x)
         out = self.bn1(out)
-        out = self.activation(out)
-
+        out = self.relu(out)
         out = self.conv2(out)
         out = self.bn2(out)
-
-        out += shortcut #ajout des données de base (shortcut) à nos données passée dans les couches de convolution
-        out = self.activation(out)
+        out += self.shortcut(x)
+        out = self.relu(out)
         return out
+    
+"""Pour la structure des Resnet voir l'article de référence de He et al., 2016"""
+
+class ResNet18(nn.Module): #de geeksforgeeks
+    def __init__(self, num_classes=3): #num classes c'est le nombre de classes que va prédire le modèle 
+        super().__init__() #super permet d'initialiser la classe parent : nn.Module
+        self.in_channels = 64 #nombre de canaux d'entrée
+
+        #entrée du réseau
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False) #input, output (64 features), taille kernel
+        self.bn1 = nn.BatchNorm2d(64) #noramlisation
+        self.relu = nn.ReLU(inplace=True) #fonction activation non linéaire
+
+
+        #4 blocs du ResNet : chaque layer correspond à un groupe de bloc résiduel
+        self.layer1 = self._make_layer(BasicBlock, 64, 2, stride=1)
+        self.layer2 = self._make_layer(BasicBlock, 128, 2, stride=2)
+        self.layer3 = self._make_layer(BasicBlock, 256, 2, stride=2)
+        self.layer4 = self._make_layer(BasicBlock, 512, 2, stride=2)
+
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1)) #résume l'image en un vecteur
+        self.fc = nn.Linear(512, num_classes) #fc : Fully Connected : classification
+
+    def _make_layer(self, block, out_channels, num_blocks, stride):
+        strides = [stride] + [1]*(num_blocks-1) # + permet de concaténer deux listes. * permet de répéter le 1
+        """
+        num_blocks = 3
+        [1] * (3 - 1)
+        = [1] * 2
+        = [1, 1] #on répète 2 fois le 1
+        donc avec le + 
+        [2] + [1, 1]
+        = [2, 1, 1]
+        
+
+    Pourquoi on fait ça ?
+
+    👉 parce que dans un bloc ResNet :
+
+    le 1er bloc peut réduire la taille (stride=2)
+    les autres blocs gardent la taille (stride=1)
+    “le premier bloc peut downsampler, les autres non"
+
+        """
+
+        layers = []
+        for stride in strides:
+            layers.append(block(self.in_channels, out_channels, stride))
+            self.in_channels = out_channels
+        return nn.Sequential(*layers)
+
+    def forward(self, x):
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+
+        out = self.layer1(out)
+        out = self.layer2(out)
+        out = self.layer3(out)
+        out = self.layer4(out)
+
+        out = self.avgpool(out)
+        out = out.view(out.size(0), -1)
+        out = self.fc(out)
+        return out
+
+
+
+#### Version chat : différence dans les strides. 
+
+
+class BasicBlock(nn.Module):
+    expansion = 1
+
+    def __init__(self, in_channels, out_channels, stride=1):
+        super().__init__()
+
+        self.conv1 = nn.Conv2d(
+            in_channels, out_channels,
+            kernel_size=3,
+            stride=stride,
+            padding=1,
+            bias=False
+        )
+        self.bn1 = nn.BatchNorm2d(out_channels)
+        self.relu = nn.ReLU(inplace=True)
+
+        self.conv2 = nn.Conv2d(
+            out_channels, out_channels,
+            kernel_size=3,
+            stride=1,
+            padding=1,
+            bias=False
+        )
+        self.bn2 = nn.BatchNorm2d(out_channels)
+
+        # shortcut
+        self.shortcut = nn.Sequential()
+        if stride != 1 or in_channels != out_channels:
+            self.shortcut = nn.Sequential(
+                nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm2d(out_channels)
+            )
+
+    def forward(self, x):
+        out = self.relu(self.bn1(self.conv1(x)))
+        out = self.bn2(self.conv2(out))
+        out += self.shortcut(x)
+        out = self.relu(out)
+        return out
+
+
+
+class ResNet18(nn.Module): 
+    def __init__(self, block, layers, num_classes=3):
+        super().__init__()
+
+        self.in_channels = 64
+
+        # Stem
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
+        self.bn1 = nn.BatchNorm2d(64)
+        self.relu = nn.ReLU(inplace=True)
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+
+        # Residual layers
+        self.layer1 = self._make_layer(block, 64,  layers[0], stride=1)
+        self.layer2 = self._make_layer(block, 128, layers[1], stride=2)
+        self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
+        self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
+
+        # Head
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc = nn.Linear(512 * block.expansion, num_classes)
+
+    def _make_layer(self, block, out_channels, blocks, stride):
+        strides = [stride] + [1] * (blocks - 1)
+
+        layers = []
+        for s in strides:
+            layers.append(block(self.in_channels, out_channels, s))
+            self.in_channels = out_channels * block.expansion
+
+        return nn.Sequential(*layers)
+
+    def forward(self, x):
+        x = self.relu(self.bn1(self.conv1(x)))
+        x = self.maxpool(x)
+
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+
+        x = self.avgpool(x)
+        x = torch.flatten(x, 1)
+        x = self.fc(x)
+
+        return x
