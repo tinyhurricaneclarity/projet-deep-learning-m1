@@ -4,6 +4,7 @@
 import skimage as ski
 import matplotlib.pyplot as plt
 from pathlib import Path
+from torch.utils.data import DataLoader
 
 #Définition des chemins
 path_train_rgb = "/net/cremi/leanguye/projet-deep-learning-m1/resnet/data/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train/RGB/"
@@ -48,3 +49,16 @@ def load_data_test(path_test_rgb):
 x_test = load_data_test(path_test_rgb)
 print("Nombre images test:", len(x_test)) #300
 
+
+#Dataloader
+
+def trainloader():
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+
+def valloader():
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+
+def testloader():
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    
+    
