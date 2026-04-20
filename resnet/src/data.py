@@ -74,9 +74,6 @@ class CustomImageDataset(Dataset): #herite de Dataset de Pytorch
 
         return image, label #retourne un tuple (image_tensor, label).
 
-def dataset_tensor(x_train, y_train):
-    dataset = CustomImageDataset(x_train, y_train)
-    return dataset
 
 #Chargement des datasets pour prendre des images de manière aléatoire dans le dataset
 
