@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset, Subset
 
-#Définition des chemins
+#Définition des chemins pour tester les fonctions
 path_train_rgb = "/net/cremi/leanguye/projet-deep-learning-m1/resnet/data/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train/RGB/"
 path_test_kaggle_rgb = "/net/cremi/leanguye/projet-deep-learning-m1/resnet/data/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/val/RGB/" #pour tester sur des images non labellisé. Par vraiment un val
 
@@ -48,8 +48,8 @@ def load_data_test_kaggle(path_test_kaggle_compet_rgb):
     
     return x_test
 
-x_test = load_data_test_kaggle(path_test_kaggle_rgb)
-print("Nombre images test:", len(x_test)) #300
+#x_test = load_data_test_kaggle(path_test_kaggle_rgb)
+#print("Nombre images test:", len(x_test)) #300
 
 
 #Conertion en Tensor 
@@ -60,7 +60,7 @@ class CustomImageDataset(Dataset): #herite de Dataset de Pytorch
     def __init__(self, images, labels, transform=None):
         self.images = images
         self.labels = labels
-        self.transform = transform if self.transform is not None else transforms.toTensor()
+        self.transform = transforms if self.transform is not None else transforms.toTensor()
 
     def __len__(self):
         return len(self.images)
@@ -71,6 +71,7 @@ class CustomImageDataset(Dataset): #herite de Dataset de Pytorch
         
         image = self.transform(image)
         label = torch.tensor(label, dtype=torch.long) #les labels sont des int, mais on convertit en tensor pour que ce soit compatible avec Pytorch
+        #torch.long est un entier 64 bits signé (int64).
 
         return image, label #retourne un tuple (image_tensor, label).
 
