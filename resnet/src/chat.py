@@ -1,4 +1,4 @@
-#### Version chat : différence dans les strides. 
+#### Version chat : différence dans les strides. Pour comparer avec version adaptée de geeksforgeeks
 
 
 class BasicBlock(nn.Module):

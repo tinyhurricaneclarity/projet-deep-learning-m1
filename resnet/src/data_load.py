@@ -60,7 +60,7 @@ class CustomImageDataset(Dataset): #herite de Dataset de Pytorch
     def __init__(self, images, labels, transform=None):
         self.images = images
         self.labels = labels
-        self.transform = transforms if self.transform is not None else transforms.toTensor()
+        self.transform = transform if transform is not None else transforms.ToTensor()
 
     def __len__(self):
         return len(self.images)

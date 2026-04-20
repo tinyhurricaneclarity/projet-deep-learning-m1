@@ -2,18 +2,17 @@
 
 import os #permet d'utiliser des fonctionnalités du système d'exploitation (mkdir, lecture...)
 import itertools
-import numpy as np
+from pathlib import Path
+
 import random
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.metrics import precision_score, recall_score, f1_score
+import skimage as ski
 
 import torch
 import torch.nn as nn
-import matplotlib.pyplot as plt
-from sklearn.metrics import precision_score, recall_score, f1_score
-import json
-import pandas as pd
-from pathlib import Path
-import skimage as ski
-
 from torch.utils.data import Dataset, Subset
 from torchvision.transforms import v2
 import torchvision.transforms as transforms
@@ -32,11 +31,11 @@ x_train, y_train = data_load.load_data_train(path_train_rgb)
 dataset = data_load.CustomImageDataset(x_train, y_train, transform=None)
 
 #Dataloader
-train_loader, val_loader, test_loader = data_load.create_dataloaders(dataset)
+train_loader, val_loader, test_loader = data_load.create_dataloader(dataset)
 
 #Définition du device et du modèle
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = model.ResNet18().to(device)
+model = model.ResNet18().to(device) #lance une nouvelle instance du modèle, ca réinitialise tout.
 print(model)
 
 #Choix de la fonction d'activation, de l'optimizer et du scheduler
@@ -46,10 +45,10 @@ scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)
 
 
 #Num epochs par défaut
-num_epochs = 10
+num_epochs = 20
 
 #Liste pour stocker les résultats (loss, acc)
-train_losses, train_acc_list, val_acc_list = [], [], []
+train_losses, train_acc_list, val_losses,  val_acc_list = [], [], [], []
 
 for epoch in range(num_epochs):
     model.train()
@@ -82,19 +81,23 @@ for epoch in range(num_epochs):
             _, predicted = outputs.max(1)
             total += labels.size(0)
             correct += predicted.eq(labels).sum().item()
+
+    val_loss = running_loss / len(val_loader.dataset)
     val_acc = 100. * correct / total
+    val_losses.append(val_loss)
     val_acc_list.append(val_acc)
     
     scheduler.step()
-    print(f'Epoch [{epoch+1}/{num_epochs}] Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.2f}% | Val Acc: {val_acc:.2f}%')
+    print(f'Epoch [{epoch+1}/{num_epochs}] Train Loss: {train_loss:.4f} | Val Loss: {val_loss:.4f} | Train Acc: {train_acc:.2f}% | Val Acc: {val_acc:.2f}%')
     
 
 plt.figure(figsize=(12,5))
 plt.subplot(1,2,1)
 plt.plot(train_losses, label='Train Loss')
+plt.plot(val_losses, label='Val Loss')
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
-plt.title('Training Loss')
+plt.title('Resnet18 - Training and Validation Loss')
 plt.legend()
 
 plt.subplot(1,2,2)
@@ -102,7 +105,7 @@ plt.plot(train_acc_list, label='Train Accuracy')
 plt.plot(val_acc_list, label='Val Accuracy')
 plt.xlabel('Epochs')
 plt.ylabel('Accuracy (%)')
-plt.title('Accuracy')
+plt.title('Resnet18 - Accuracy')
 plt.legend()
 
 plt.show()
