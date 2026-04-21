@@ -75,8 +75,7 @@ x_train, y_train = data_load.load_data_train(path_train_rgb)
 dataset = data_load.CustomImageDataset(x_train, y_train, transform=None)
 
 #Dataloader
-train_loader, val_loader, test_loader = data_load.create_dataloader(dataset, batch_size=batch_size)
-print(len(train_loader), len(val_loader))
+train_loader, val_loader, test_loader, _, _ = data_load.create_dataloader(dataset, batch_size=batch_size)
 
 #Liste pour stocker les résultats (loss, acc)
 train_losses, train_acc_list, val_losses,  val_acc_list = [], [], [], []
