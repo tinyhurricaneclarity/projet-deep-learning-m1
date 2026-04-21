@@ -179,6 +179,7 @@ Num_data    = 600
 path = "/home/mona/Documents/Projet/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train"
 
 # Split aléatoire PAR CLASSE
+random.seed(3557)
 dico_train_test = alea_train_test(Num_data, class_names, n_val=99, n_test=99)
 
 # Chemins vers les deux modalités
@@ -195,27 +196,6 @@ print(f"Val   : {len(Val['images'])} images")
 print(f"Test  : {len(Test['images'])} images")
 print(f"Shape d'une image : {Train['images'][0].shape}")  # doit être (64, 64, 8)
 
-
-### HISTOGRAMMES DES CLASSES
-
-fig, axes = plt.subplots(1, 3, figsize=(15, 4))
-
-for ax, data, title, color in zip(
-    axes,
-    [Train, Val, Test],
-    ["Train", "Val", "Test"],
-    ["blue", "orange", "green"]
-):
-    counts = Counter(data['labels'])
-    values = [counts[0], counts[1], counts[2]]
-    ax.bar(class_names, values, color=color)
-    ax.set_title(f"Distribution ({title})")
-    ax.set_xlabel("Classes")
-    ax.set_ylabel("Nombre d'images")
-
-plt.tight_layout()
-plt.savefig("histogrammes_complets_RGB_MS.png")
-print("Histogrammes sauvegardés dans histogrammes_complets_RGB_MS.png")
 
 
 ### HYPERPARAMETRES
@@ -259,11 +239,18 @@ val_losses       = []
 train_accuracies = []
 val_accuracies   = []
 
-best_val_loss = float('inf')
+best_val_loss            = float('inf')
+epochs_sans_amelioration = 0
+patience                 = 15  # arrête si pas d'amélioration pendant 15 epochs
+stop_training            = False 
+
 os.makedirs("saved_models", exist_ok=True)
 
 print("Début de l'entraînement.")
 for epoch in range(1, num_epochs + 1):
+
+    if stop_training:
+        continue  # saute les epochs restantes
 
     # Phase train
     model.train()
@@ -318,10 +305,18 @@ for epoch in range(1, num_epochs + 1):
 
     scheduler.step(val_loss)
 
+    # Sauvegarde du meilleur modèle + early stopping
     if val_loss < best_val_loss:
-        best_val_loss = val_loss
+        best_val_loss            = val_loss
+        epochs_sans_amelioration = 0
         torch.save(model.state_dict(), "saved_models/convnet_RGB_MS_best.pth")
         print(f"  -> Meilleur modèle sauvegardé à l'epoch {epoch} (Val Loss: {val_loss:.4f})")
+    else:
+        epochs_sans_amelioration += 1
+        if epochs_sans_amelioration >= patience:
+            print(f"Early stopping déclenché à l'epoch {epoch} — pas d'amélioration depuis {patience} epochs.")
+            stop_training = True
+
 
 
 ### EVALUATION FINALE SUR LE JEU DE TEST
@@ -357,11 +352,11 @@ for i, classe in enumerate(class_names):
 
 ### COURBES D'APPRENTISSAGE
 
-epochs = range(1, num_epochs + 1)
+epochs_range = range(1, len(train_losses) + 1)
 
 plt.figure(figsize=(10, 4))
-plt.plot(epochs, train_losses, label='Train Loss', marker='o')
-plt.plot(epochs, val_losses,   label='Val Loss',   marker='o')
+plt.plot(epochs_range, train_losses, label='Train Loss', marker='o')
+plt.plot(epochs_range, val_losses,   label='Val Loss',   marker='o')
 plt.xlabel("Epoch")
 plt.ylabel("Loss")
 plt.title("Courbe de loss - ConvNet RGB+MS")
@@ -370,8 +365,8 @@ plt.savefig("loss_convnet_RGB_MS.png")
 print("Courbe de loss sauvegardée dans loss_convnet_RGB_MS.png")
 
 plt.figure(figsize=(10, 4))
-plt.plot(epochs, train_accuracies, label='Train Accuracy', marker='o')
-plt.plot(epochs, val_accuracies,   label='Val Accuracy',   marker='o')
+plt.plot(epochs_range, train_accuracies, label='Train Accuracy', marker='o')
+plt.plot(epochs_range, val_accuracies,   label='Val Accuracy',   marker='o')
 plt.xlabel("Epoch")
 plt.ylabel("Accuracy")
 plt.title("Courbe d'accuracy - ConvNet RGB+MS")

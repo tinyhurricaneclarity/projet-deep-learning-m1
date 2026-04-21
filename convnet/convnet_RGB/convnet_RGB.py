@@ -234,6 +234,7 @@ path = "/home/mona/Documents/Projet/beyond-visible-spectrum-ai-for-agriculture-2
 
 # Fabrication du split aléatoire PAR CLASSE
 # 99 val (33 par classe) + 99 test (33 par classe) + 402 train (134 par classe)
+random.seed(3557)
 dico_train_test = alea_train_test(Num_data, class_names, n_val=99, n_test=99)
 sufix_and_path(Im_type, dico_train_test, path)
 
@@ -246,28 +247,6 @@ print(f"Train : {len(Train['images'])} images")
 print(f"Val   : {len(Val['images'])} images")
 print(f"Test  : {len(Test['images'])} images")
 
-
-
-### HISTOGRAMMES DES CLASSES
-
-fig, axes = plt.subplots(1, 3, figsize=(15, 4))
-
-for ax, data, title, color in zip(
-    axes,
-    [Train, Val, Test],
-    ["Train", "Val", "Test"],
-    ["blue", "orange", "green"]
-):
-    counts = Counter(data['labels'])
-    values = [counts[0], counts[1], counts[2]]
-    ax.bar(class_names, values, color=color)
-    ax.set_title(f"Distribution ({title})")
-    ax.set_xlabel("Classes")
-    ax.set_ylabel("Nombre d'images")
-
-plt.tight_layout()
-plt.savefig("histogrammes_complets.png")
-print("Histogrammes sauvegardés dans histogrammes_complets.png")
 
 
 
@@ -310,17 +289,23 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
 
 ### BOUCLE D'ENTRAINEMENT
 
-
 train_losses     = []
 val_losses       = []
 train_accuracies = []
 val_accuracies   = []
 
-best_val_loss = float('inf')
+best_val_loss            = float('inf')
+epochs_sans_amelioration = 0
+patience                 = 15  # arrête si pas d'amélioration pendant 15 epochs
+stop_training            = False 
+
 os.makedirs("saved_models", exist_ok=True)
 
 print("Début de l'entraînement.")
 for epoch in range(1, num_epochs + 1):
+
+    if stop_training:
+        continue  # saute les epochs restantes
 
     # Phase train
     model.train()
@@ -375,17 +360,23 @@ for epoch in range(1, num_epochs + 1):
 
     scheduler.step(val_loss)
 
-    # Sauvegarde du meilleur modèle
+    # Sauvegarde du meilleur modèle + early stopping
     if val_loss < best_val_loss:
-        best_val_loss = val_loss
-        torch.save(model.state_dict(), "saved_models/convnet_best.pth")
+        best_val_loss            = val_loss
+        epochs_sans_amelioration = 0
+        torch.save(model.state_dict(), "saved_models/convnet_RGB_best.pth")
         print(f"  -> Meilleur modèle sauvegardé à l'epoch {epoch} (Val Loss: {val_loss:.4f})")
+    else:
+        epochs_sans_amelioration += 1
+        if epochs_sans_amelioration >= patience:
+            print(f"Early stopping déclenché à l'epoch {epoch} — pas d'amélioration depuis {patience} epochs.")
+            stop_training = True
 
 
 
 ### EVALUATION FINALE SUR LE JEU DE TEST
 
-print("\nChargement du meilleur modèle.")
+print("\nChargement du meilleur modèle.")    # on recharge le meilleur modèle sauvegardé
 model.load_state_dict(torch.load("saved_models/convnet_best.pth"))
 
 print("Evaluation sur le jeu de test.")
@@ -405,6 +396,7 @@ with torch.no_grad():
 # F1-score global
 f1 = f1_score(all_labels, all_preds, average="macro")
 print(f"F1-score macro : {f1:.4f}")
+# F1 score macro calcule la moyenne du F1 score sur les 3 classes de manière équilibrée
 
 # Matrice de confusion
 cm = confusion_matrix(all_labels, all_preds)
@@ -421,26 +413,26 @@ for i, classe in enumerate(class_names):
 ### COURBES D'APPRENTISSAGE
 
 
-epochs = range(1, num_epochs + 1)
+epochs_range = range(1, len(train_losses) + 1)
 
 plt.figure(figsize=(10, 4))
-plt.plot(epochs, train_losses, label='Train Loss', marker='o')
-plt.plot(epochs, val_losses,   label='Val Loss',   marker='o')
+plt.plot(epochs_range, train_losses, label='Train Loss', marker='o')
+plt.plot(epochs_range, val_losses,   label='Val Loss',   marker='o')
 plt.xlabel("Epoch")
 plt.ylabel("Loss")
 plt.title("Courbe de loss - ConvNet RGB")
 plt.legend()
-plt.savefig("loss_convnet.png")
-print("Courbe de loss sauvegardée dans loss_convnet.png")
+plt.savefig("loss_convnet_RGB.png")
+print("Courbe de loss sauvegardée dans loss_convnet_RGB.png")
 
 plt.figure(figsize=(10, 4))
-plt.plot(epochs, train_accuracies, label='Train Accuracy', marker='o')
-plt.plot(epochs, val_accuracies,   label='Val Accuracy',   marker='o')
+plt.plot(epochs_range, train_accuracies, label='Train Accuracy', marker='o')
+plt.plot(epochs_range, val_accuracies,   label='Val Accuracy',   marker='o')
 plt.xlabel("Epoch")
 plt.ylabel("Accuracy")
 plt.title("Courbe d'accuracy - ConvNet RGB")
 plt.legend()
-plt.savefig("accuracy_convnet.png")
-print("Courbe d'accuracy sauvegardée dans accuracy_convnet.png")
+plt.savefig("accuracy_convnet_RGB.png")
+print("Courbe d'accuracy sauvegardée dans accuracy_convnet_RGB.png")
 
 print("\nTerminé.")
