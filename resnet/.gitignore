@@ -11,5 +11,5 @@ data/*
 !data/.gitkeep #! = not en bash
 
 #Graphiques résultats 
-results/**/* #les sous dossiers et leur contenu
+results/*
 !results/.gitkeep
