@@ -23,6 +23,7 @@ import matplotlib.pyplot as plt
 import skimage as ski
 import random
 from collections import Counter
+import time 
 
 import torch
 import torch.nn as nn
@@ -251,6 +252,8 @@ for epoch in range(1, num_epochs + 1):
 
     if stop_training:
         continue  # saute les epochs restantes
+    
+    start_time = time.time()  # <- début du chrono
 
     # Phase train
     model.train()
@@ -301,7 +304,10 @@ for epoch in range(1, num_epochs + 1):
     val_losses.append(val_loss)
     val_accuracies.append(val_acc)
 
-    print(f"Epoch [{epoch:02d}/{num_epochs}] | Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.4f} | Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.4f}")
+    end_time = time.time()  # <- fin du chrono
+    epoch_time = end_time - start_time
+
+    print(f"Epoch [{epoch:02d}/{num_epochs}] | Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.4f} | Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.4f} | Temps: {epoch_time:.2f}s")
 
     scheduler.step(val_loss)
 

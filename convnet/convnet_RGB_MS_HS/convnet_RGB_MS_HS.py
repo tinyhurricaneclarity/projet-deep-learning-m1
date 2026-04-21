@@ -25,6 +25,7 @@ import skimage as ski
 from skimage.transform import resize
 import random
 from collections import Counter
+import time
 
 import torch
 import torch.nn as nn
@@ -272,6 +273,8 @@ for epoch in range(1, num_epochs + 1):
 
     if stop_training:
         continue  # saute les epochs restantes 
+    
+    start_time = time.time()  # <- début du chrono
 
     # Phase train
     model.train()
