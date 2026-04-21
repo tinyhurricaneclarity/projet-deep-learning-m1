@@ -130,6 +130,23 @@ for epoch in range(num_epochs):
     print(f'Epoch [{epoch+1}/{num_epochs}] Train Loss: {train_loss:.4f} | Val Loss: {val_loss:.4f} | Train Acc: {train_acc:.2f}% | Val Acc: {val_acc:.2f}%')
     
 
+
+    #Sauvegarde du meilleur modèle sur base loss et acc (ancien modèle écrasé si meilleur)
+
+    best_val_loss = float('inf') #initialise à l'infini positif (donc un nbr positif tout simplement), parce que la loss est tjrs >0
+    best_val_acc = 0
+    os.makedirs("saved_models", exist_ok=True)
+    
+
+    if val_loss < best_val_loss:
+        best_val_loss = val_loss
+        torch.save(model.state_dict(), "best_loss.pth")
+
+    if val_acc > best_val_acc:
+        best_val_acc = val_acc
+        torch.save(model.state_dict(), "best_acc.pth")
+
+
 #affichage des résultats et des paramètres
 
 config_str = f"config{config_counter}, optimizer{optimizer_config}, epochs{num_epochs}, lr{learning_rate}, batch_size{batch_size}, momentum{momentum}, weight_decay{weight_decay}, step_size{step_size}, gamma{gamma}"

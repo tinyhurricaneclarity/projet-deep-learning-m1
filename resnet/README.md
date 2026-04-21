@@ -47,3 +47,11 @@ resnet/
 ├── README.md
 └── .gitignore
 ```
+
+# Ce qu'il reste à faire
+
+sauvegarde des best val loss et acc 
+faire test
+data load en prenant au hasard parmi les classes
+générer les métriques pour comparer les modèles
+grid search
