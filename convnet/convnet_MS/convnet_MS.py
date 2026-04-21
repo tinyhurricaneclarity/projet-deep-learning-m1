@@ -183,7 +183,7 @@ Num_data    = 600
 
 path = "/home/mona/Documents/Projet/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train"
 
-random.seed(3557)
+random.seed(42)
 dico_train_test = alea_train_test(Num_data, class_names, n_val=99, n_test=99)
 sufix_and_path(Im_type, dico_train_test, path)
 

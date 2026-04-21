@@ -181,7 +181,7 @@ Num_data    = 400  # 200 Health + 200 Rust uniquement
 
 path = "/home/mona/Documents/Projet/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train"
 
-random.seed(3557)
+random.seed(42)
 dico_train_test = alea_train_test(Num_data, class_names, n_val=66, n_test=66)
 sufix_and_path(Im_type, dico_train_test, path)
 
