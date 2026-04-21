@@ -22,16 +22,6 @@ import torch.optim as optim
 import data_load
 import model
 
-path_train_rgb = "/net/cremi/leanguye/projet-deep-learning-m1/resnet/data/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train/RGB/"
-
-#Import des données train provenant de data.py
-x_train, y_train = data_load.load_data_train(path_train_rgb)
-
-#Convertion en tensor et trainloader
-dataset = data_load.CustomImageDataset(x_train, y_train, transform=None)
-
-#Dataloader
-train_loader, val_loader, test_loader = data_load.create_dataloader(dataset)
 
 #Définition du device et du modèle
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -45,40 +35,52 @@ print(model)
 config_counter = 1
 num_epochs = 100
 learning_rate = 0.1
-batch_size = 128
-num_blocks = 4
-base_channels = 64
-kernel_size = 3
+batch_size = 32
 momentum = 0.9
 weight_decay = 5e-4
 step_size = 30
 gamma = 0.1
+criterion_config = "CrossEntropy"
+optimizer_config = "SGD"
+scheduler_config =  "StepLR"
 
 config = {
     "config_counter": config_counter,
     "num_epochs": num_epochs,
     "learning_rate": learning_rate,
     "batch_size": batch_size,
-    "num_blocks": num_blocks,
-    "base_channels": base_channels,
-    "kernel_size": kernel_size,
     "momentum": momentum,
     "weight_decay": weight_decay,
     "step_size": step_size,
-    "gamma": gamma
+    "gamma": gamma,
+    "criterion": criterion_config,
+    "optimizer": optimizer_config,
+    "scheduler": scheduler_config,
+  
 }
+
 
 #Choix de la fonction d'activation, de l'optimizer et du scheduler
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(model.parameters(), lr=config[learning_rate], momentum=config[momentum], weight_decay=config[weight_decay])
-scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=config[step_size], gamma=config[gamma])
+optimizer = optim.SGD(model.parameters(), lr=config["learning_rate"], momentum=config["momentum"], weight_decay=config["weight_decay"])
+scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=config["step_size"], gamma=config["gamma"])
 
 
-#Num epochs par défaut
-num_epochs = 20
+#Import des données train provenant de data.py
+
+path_train_rgb = "/net/cremi/leanguye/projet-deep-learning-m1/resnet/data/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train/RGB/"
+x_train, y_train = data_load.load_data_train(path_train_rgb)
+
+#Convertion en tensor et trainloader
+dataset = data_load.CustomImageDataset(x_train, y_train, transform=None)
+
+#Dataloader
+train_loader, val_loader, test_loader = data_load.create_dataloader(dataset, batch_size=batch_size)
+print(len(train_loader), len(val_loader))
 
 #Liste pour stocker les résultats (loss, acc)
 train_losses, train_acc_list, val_losses,  val_acc_list = [], [], [], []
+
 
 #entrainement du modèle
 
@@ -129,15 +131,15 @@ for epoch in range(num_epochs):
     print(f'Epoch [{epoch+1}/{num_epochs}] Train Loss: {train_loss:.4f} | Val Loss: {val_loss:.4f} | Train Acc: {train_acc:.2f}% | Val Acc: {val_acc:.2f}%')
     
 
+#affichage des résultats et des paramètres
 
-
-
-config_str = f"config{config_counter}_epochs{num_epochs}_learningrate{learning_rate}_batchsize{batch_size}_numblocks{num_blocks}_basechannels{base_channels}_kernelsize{kernel_size}"
+config_str = f"config{config_counter}, optimizer{optimizer_config}, epochs{num_epochs}, lr{learning_rate}, batch_size{batch_size}, momentum{momentum}, weight_decay{weight_decay}, step_size{step_size}, gamma{gamma}"
 print(f"Running config {config_str}")
 
-plt.suptitle(config_str, fontsize=8)
 
 plt.figure(figsize=(12,5))
+
+plt.suptitle(config_str, fontsize=8)
 plt.subplot(1,2,1)
 plt.plot(train_losses, label='Train Loss')
 plt.plot(val_losses, label='Val Loss')

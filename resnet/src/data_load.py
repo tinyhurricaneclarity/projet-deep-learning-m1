@@ -92,5 +92,5 @@ def create_dataloader(dataset, batch_size=32, seed=42):
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-    return train_loader, val_loader, test_loader
+    return train_loader, val_loader, test_loader, train_size, val_size
     
