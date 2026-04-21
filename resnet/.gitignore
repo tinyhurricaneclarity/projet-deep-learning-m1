@@ -9,7 +9,3 @@ __pycache__/
 # Ne pas envoyer les fichiers contenus dans data sur github en laissant apparent le dossier (.gitkeep)
 data/* 
 !data/.gitkeep #! = not en bash
-
-#Graphiques résultats 
-results/*
-!results/.gitkeep
