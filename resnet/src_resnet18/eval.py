@@ -15,7 +15,7 @@ model = model.ResNet18().to(device) #lance une nouvelle instance du modèle, ca 
 print(model)
 
 #Chargement du modèle sauvegardé à tester
-model.load_state_dict(torch.load("saved_models/convnet_best.pth"))
+model.load_state_dict(torch.load("/autofs/unityaccount/cremi/leanguye/projet-deep-learning-m1/resnet/results/saved_models/best_acc.pth"))
 
 #Import des datasets train, val et test 
 
@@ -29,7 +29,8 @@ test_indices = torch.load("results/test_indices.pth")
 test_dataset = torch.utils.data.Subset(dataset, test_indices) #crée un sous-ensemble du dataset original en utilisant une liste d’indices.
 test_loader  = DataLoader(test_dataset, batch_size=batch_size, shuffle=False) #créer les batch sans shuffle à partir du test dataset
 
-print("Evaluation sur le jeu de test.")
+print("Evaluation sur le jeu de test\n")
+
 model.eval()
 all_preds  = []
 all_labels = []
