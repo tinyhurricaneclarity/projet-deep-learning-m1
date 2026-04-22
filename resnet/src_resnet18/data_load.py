@@ -81,11 +81,14 @@ def create_dataloader(dataset, batch_size=32, seed=42):
     dataset_size = len(dataset)
 
     #split dataset : 70% training 10% validation et 20% test
+
     train_size = int(0.7 * dataset_size)
     val_size = int(0.1 * dataset_size)
     test_size = dataset_size - train_size - val_size
 
     train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(dataset, [train_size, val_size, test_size], generator=torch.Generator().manual_seed(seed))
+
+    #Création des loaders après le split 
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True) #on shuffle pour éviter d'apprendre l'ordre des données
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)

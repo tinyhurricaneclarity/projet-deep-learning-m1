@@ -77,6 +77,9 @@ dataset = data_load.CustomImageDataset(x_train, y_train, transform=None)
 #Dataloader
 train_loader, val_loader, test_loader, _, _ = data_load.create_dataloader(dataset, batch_size=batch_size)
 
+# sauvegarde test loader indices (pour garder les memes indices pour l'évaluation dans eval.py)
+torch.save(test_loader.dataset.indices, "results/test_indices.pth")
+
 #Liste pour stocker les résultats (loss, acc)
 train_losses, train_acc_list, val_losses,  val_acc_list = [], [], [], []
 

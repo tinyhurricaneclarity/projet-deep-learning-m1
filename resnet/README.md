@@ -41,16 +41,18 @@ resnet/
 │
 ├── results/
 │   ├── figures/
-│   ├── models/
+│   ├── saved_models/
+    ├── test_indices.pth <- indices des train, val et test pour garantir que les datasets sont les memes entre train.py et eval.py
 │
 ├── requirements.txt
 ├── README.md
 └── .gitignore
 ```
 
+
 # Ce qu'il reste à faire
 
-sauvegarde des best val loss et acc 
+FAIT sauvegarde des best val loss et acc 
 faire test
 data load en prenant au hasard parmi les classes
 générer les métriques pour comparer les modèles
