@@ -20,7 +20,7 @@ model.load_state_dict(torch.load("/autofs/unityaccount/cremi/leanguye/projet-dee
 
 #Import des datasets train, val et test 
 
-path_train_rgb = "/net/cremi/leanguye/projet-deep-learning-m1/resnet/data/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train/RGB/"
+path_train_rgb = "/net/cremi/leanguye/projet-deep-learning-m1/resnet18/data/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train/RGB/"
 x_train, y_train = data_load.load_data_train(path_train_rgb)
 
 #Convertion en tensor et trainloaderpourq

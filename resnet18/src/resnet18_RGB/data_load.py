@@ -10,8 +10,8 @@ import torchvision.transforms as transforms
 from torch.utils.data import Dataset, Subset
 
 #Définition des chemins pour tester les fonctions
-path_train_rgb = "/net/cremi/leanguye/projet-deep-learning-m1/resnet/data/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train/RGB/"
-path_test_kaggle_rgb = "/net/cremi/leanguye/projet-deep-learning-m1/resnet/data/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/val/RGB/" #pour tester sur des images non labellisé. Par vraiment un val
+path_train_rgb = "/net/cremi/leanguye/projet-deep-learning-m1/resnet18/data/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train/RGB/"
+path_test_kaggle_rgb = "/net/cremi/leanguye/projet-deep-learning-m1/resnet18/data/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/val/RGB/" #pour tester sur des images non labellisé. Par vraiment un val
 
 
 # Import des données : 600 images train
