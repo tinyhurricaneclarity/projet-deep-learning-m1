@@ -1,8 +1,8 @@
 #Evaluation test set
 
-import model
+import resnet18.src.resnet18_RGB.model as model
 import torch
-import data_load
+import resnet18.src.resnet18_RGB.data_load as data_load
 from torch.utils.data import DataLoader
 from sklearn.metrics import f1_score, confusion_matrix, accuracy_score, recall_score, precision_score
 from config import class_names, batch_size
@@ -16,7 +16,7 @@ model = model.ResNet18().to(device) #lance une nouvelle instance du modèle, ca 
 print(model)
 
 #Chargement du modèle sauvegardé à tester
-model.load_state_dict(torch.load("/autofs/unityaccount/cremi/leanguye/projet-deep-learning-m1/resnet/results/saved_models/best_acc.pth"))
+model.load_state_dict(torch.load("/autofs/unityaccount/cremi/leanguye/projet-deep-learning-m1/resnet18/results/saved_models/best_acc.pth"))
 
 #Import des datasets train, val et test 
 
