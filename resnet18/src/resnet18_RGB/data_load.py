@@ -35,7 +35,7 @@ def load_data_train(path_train_rgb):
 
     return x_train, y_train
 
-#x_train, y_train = load_data_train(path_train_rgb, path_train_val)
+x_train, y_train = load_data_train(path_train_rgb)
 #print("Nombre images train:", len(y_train))
 
 # Import des images tests rgb + labels

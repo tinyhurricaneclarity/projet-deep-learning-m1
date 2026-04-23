@@ -1,8 +1,8 @@
 #Evaluation test set
 
-import resnet18.src.resnet18_RGB.model as model
+import model
 import torch
-import resnet18.src.resnet18_RGB.data_load as data_load
+import data_load
 from torch.utils.data import DataLoader
 from sklearn.metrics import f1_score, confusion_matrix, accuracy_score, recall_score, precision_score
 from config import class_names, batch_size
