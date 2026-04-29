@@ -1,6 +1,7 @@
 """Train avec grid_search
-import des data au hasard """
-
+import des data PAR CLASSE. Hasard dans les classes (Health, Rust, Other)
+sans data augmentation
+ """
 
 #Import des packages
 
@@ -22,6 +23,7 @@ from torchvision.transforms import v2
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import torch.optim as optim
+import random
 
 import data_load
 import model as model_module
@@ -30,20 +32,52 @@ import model as model_module
 #Définition du device et du modèle
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-#Import des données train provenant de data.py
 
-path_train_rgb = "/net/cremi/leanguye/projet-deep-learning-m1/resnet18/data/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train/RGB/"
-x_train, y_train = data_load.load_data_train(path_train_rgb)
+# Import des données train provenant de data.py
 
-#Convertion en tensor et trainloader
-dataset = data_load.CustomImageDataset(x_train, y_train, transform=None)
+### CHOIX DES INPUTS ET PARAMETRES
 
-#Dataloader
-batch_size = 32
-train_loader, val_loader, test_loader, _, _ = data_load.create_dataloader(dataset, batch_size=batch_size)
+class_names = ["Health", "Rust", "Other"]
+Im_type     = "RGB"
+Num_data    = 600  # 200 images par classe
+
+path = "/net/cremi/leanguye/projet-deep-learning-m1/resnet18/data/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train"
+
+# Fabrication du split aléatoire PAR CLASSE
+# 99 val (33 par classe) + 99 test (33 par classe) + 402 train (134 par classe)
+dico_train_test = data_load.alea_train_test(Num_data, class_names, n_val=99, n_test=99)
+data_load.sufix_and_path(Im_type, dico_train_test, path)
+
+
+
+# Chargement des images
+Train = data_load.import_images(class_names, dico_train_test, "train")
+Val   = data_load.import_images(class_names, dico_train_test, "val")
+Test  = data_load.import_images(class_names, dico_train_test, "test")
+
+print(f"Train : {len(Train['images'])} images")
+print(f"Val   : {len(Val['images'])} images")
+print(f"Test  : {len(Test['images'])} images")
 
 # sauvegarde test loader indices (pour garder les memes indices pour l'évaluation dans eval.py)
-torch.save(test_loader.dataset.indices, "results/test_indices.pth")
+torch.save(dico_train_test, "src/resnet18_RGB/results/split_par_classe.pth") #dictionnaire {"images": np.array(images), "labels": labels}
+
+
+#Convertion en tensor et trainloader
+
+
+### DATASETS ET DATALOADERS
+
+batch_size = 32
+
+train_dataset = data_load.CustomImageDataset(Train['images'], Train['labels'], transform=None)
+val_dataset   = data_load.CustomImageDataset(Val['images'],   Val['labels'],   transform=None)
+test_dataset  = data_load.CustomImageDataset(Test['images'],  Test['labels'],  transform=None)
+
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+val_loader   = DataLoader(val_dataset,   batch_size=batch_size, shuffle=False)
+test_loader  = DataLoader(test_dataset,  batch_size=batch_size, shuffle=False)
+
 
 #Fonction loss
 criterion = nn.CrossEntropyLoss()
@@ -51,8 +85,8 @@ criterion = nn.CrossEntropyLoss()
 #Initialisation des variables pour stocker le meilleur modèle
 best_val_loss = float('inf') #initialise à l'infini positif (donc un nbr positif tout simplement), parce que la loss est tjrs >0
 best_val_acc = 0
-os.makedirs("results/saved_models", exist_ok=True)
 
+os.makedirs("results/saved_models", exist_ok=True)
 
 #Grid search des hyperparamètres
 
@@ -220,7 +254,7 @@ for (num_epochs, learning_rate, optimizer_name, scheduler_name, step_size, gamma
 
 #Résumé des résultats dans un ficher CSV
 df = pd.DataFrame(results_summary)
-df.to_csv("src/resnet18_RGB/results/grid_search_results.csv", index=False)
+df.to_csv("src/resnet18_RGB/results/grid_search_results_par_classe.csv", index=False)
 print("CSV résultats.")
 
 # Affichage meilleur modèle
