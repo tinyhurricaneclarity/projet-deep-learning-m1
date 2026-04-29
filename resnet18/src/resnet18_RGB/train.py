@@ -207,16 +207,16 @@ for (num_epochs, learning_rate, optimizer_name, scheduler_name, step_size, gamma
 
     if val_loss < best_val_loss:
         best_val_loss = val_loss
-        torch.save(model.state_dict(), "results/saved_models/best_loss.pth")
+        torch.save(model.state_dict(), "src/resnet18_RGB/results/saved_models/best_loss.pth")
 
     if val_acc > best_val_acc:
         best_val_acc = val_acc
-        torch.save(model.state_dict(), "results/saved_models/best_acc.pth")
+        torch.save(model.state_dict(), "src/resnet18_RGB/results/saved_models/best_acc.pth")
 
 
 #Résumé des résultats dans un ficher CSV
 df = pd.DataFrame(results_summary)
-df.to_csv("results/grid_search_results.csv", index=False)
+df.to_csv("src/resnet18_RGB/results/grid_search_results.csv", index=False)
 print("CSV résultats.")
 
 # Affichage meilleur modèle
