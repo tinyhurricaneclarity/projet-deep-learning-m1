@@ -33,13 +33,17 @@ resnet18/
 │   └── exploration.ipynb
 │
 ├── src/
-    ├── resnet18_RGB/
-        ├── config.py
+│    ├──resnet18_HS/
+│    ├──resnet18_MS/
+│    ├──resnet18_RGB_MS/
+│    ├──resnet18_RGB_MS_HS/
+│    ├── resnet18_RGB/
+│       ├── config.py
 │       ├── data_load.py
 │       ├── model.py
 │       ├── train.py
 │       ├── eval.py
-│       ├── train.py
+│       ├── results
 │
 ├── results/
 │   ├── figures/
@@ -93,6 +97,7 @@ Résumer les résultats sur overleaf
 
 faire comparaison resnet 50
 
+changer l'arborescence
 
 # Protocole expérimental
 
