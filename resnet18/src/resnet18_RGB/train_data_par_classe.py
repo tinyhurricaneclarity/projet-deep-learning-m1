@@ -9,7 +9,7 @@ import os #permet d'utiliser des fonctionnalités du système d'exploitation (mk
 import itertools
 from pathlib import Path
 
-import random
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -262,28 +262,3 @@ print("\n─── Résumé grid search ───")
 for r in sorted(results_summary, key=lambda x: x["val_acc"], reverse=True)[:5]:
     print(f"  {r['config']}  →  val_acc={r['val_acc']:.2f}%  val_loss={r['val_loss']:.4f}")
 
-
-
-"""
-plt.figure(figsize=(12,5))
-
-plt.suptitle(config_str, fontsize=8)
-plt.subplot(1,2,1)
-plt.plot(train_losses, label='Train Loss')
-plt.plot(val_losses, label='Val Loss')
-plt.xlabel('Epochs')
-plt.ylabel('Loss')
-plt.title('Resnet18 - Training and Validation Loss')
-plt.legend()
-
-plt.subplot(1,2,2)
-plt.plot(train_acc_list, label='Train Accuracy')
-plt.plot(val_acc_list, label='Val Accuracy')
-plt.xlabel('Epochs')
-plt.ylabel('Accuracy (%)')
-plt.title('Resnet18 - Accuracy')
-plt.legend()
-
-plt.show()
-
-"""
