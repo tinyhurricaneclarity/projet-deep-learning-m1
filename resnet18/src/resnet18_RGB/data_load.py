@@ -99,7 +99,7 @@ def create_dataloader(dataset, batch_size=32, seed=42):
     return train_loader, val_loader, test_loader, train_size, val_size
     
 
-"""Pour importer par classe"""
+"""-------------------------------Pour importer par classe-------------------------------------------------"""
 
 
 
@@ -195,4 +195,33 @@ def import_images(class_names, dico, tr_or_te="train"):
         labels.append(j)
 
     return {"images": np.array(images), "labels": labels}
+
+
+
+"""---------------------------------Data augmentation-------------------------------------"""
+
+### TRANSFORMATIONS DES IMAGES
+
+# Pour le train : avec data augmentation dynamique
+# A chaque epoch, une transformation aléatoire différente est appliquée
+# ce qui force le modèle à généraliser plutôt qu'apprendre par coeur
+train_transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.RandomHorizontalFlip(),   # flip horizontal aléatoire
+    transforms.RandomVerticalFlip(),     # flip vertical aléatoire
+    transforms.RandomRotation(15),       # rotation aléatoire jusqu'à 15 degrés
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                         std=[0.229, 0.224, 0.225]) #permet de "lisser" la distribution des tensors (valeurs autour de 0) pour accélérer l’entraînement et rendre l’optimisation plus stable
+])
+
+
+# Pour val et test : sans augmentation
+eval_transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                         std=[0.229, 0.224, 0.225])
+])
+
+
+
 

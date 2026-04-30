@@ -80,14 +80,10 @@ Intégré au processeur (iGPU) : Intel UHD Graphics 770
 # Ce qu'il reste à faire
 
 
-FAIT Faire autres métriques : rappel, sensibilité, précision. intéret ? -> comprendre les erreurs du modèle
 
 faire sauvegarde des résultats de test. affichage graphique de la matrice de confusion ?
-Faire sauvegarde sous forme de tableau des métriques
 
-
-data load en prenant au hasard parmi les classes
-grid search
+Faire analyse des résultats avec histogramme et heatmap
 
 
 POur aller plus loin : analyse statistiques corrélation entre couleur des pixels et classe
