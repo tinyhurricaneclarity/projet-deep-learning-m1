@@ -33,13 +33,17 @@ resnet18/
 │   └── exploration.ipynb
 │
 ├── src/
-    ├── resnet18_RGB/
-        ├── config.py
+│    ├──resnet18_HS/
+│    ├──resnet18_MS/
+│    ├──resnet18_RGB_MS/
+│    ├──resnet18_RGB_MS_HS/
+│    ├── resnet18_RGB/
+│       ├── config.py
 │       ├── data_load.py
 │       ├── model.py
 │       ├── train.py
 │       ├── eval.py
-│       ├── train.py
+│       ├── results
 │
 ├── results/
 │   ├── figures/
@@ -75,21 +79,44 @@ Intégré au processeur (iGPU) : Intel UHD Graphics 770
 
 # Ce qu'il reste à faire
 
-FAIT sauvegarde des best val loss et acc 
-FAIT faire test
-FAIT F1 score et confusion matrix. Reste générer les métriques pour comparer les modèles. 
-FAIT Faire autres métriques : rappel, sensibilité, précision. intéret ? -> comprendre les erreurs du modèle
+
 
 faire sauvegarde des résultats de test. affichage graphique de la matrice de confusion ?
-Faire sauvegarde sous forme de tableau des métriques
 
-data load en prenant au hasard parmi les classes
-grid search
+Faire analyse des résultats avec histogramme et heatmap
+
+
+POur aller plus loin : analyse statistiques corrélation entre couleur des pixels et classe
+grad cam
 
 Résumer les résultats sur overleaf
 
-
 faire comparaison resnet 50
+
+changer l'arborescence
+
+# Protocole expérimental
+
+
+base commune pour chaque modèle
+
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+    optimizer, 
+    mode='min',        # réduit quand la val loss ne s'améliore plus
+    factor=0.5,        # divise le learning rate par 2
+    patience=5,        # attend 5 epochs sans amélioration avant de réduire
+)
+
+batch_size    = 32
+num_epochs    = 100
+learning_rate = 0.001
+
+
+
+avec - sans dataaugmentation
+
 
 K fold ?
 Si ton dataset était très petit (< 1000 exemples) et que chaque exemple compte

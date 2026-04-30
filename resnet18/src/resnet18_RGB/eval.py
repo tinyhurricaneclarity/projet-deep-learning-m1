@@ -20,13 +20,13 @@ model.load_state_dict(torch.load("/autofs/unityaccount/cremi/leanguye/projet-dee
 
 #Import des datasets train, val et test 
 
-path_train_rgb = "/net/cremi/leanguye/projet-deep-learning-m1/resnet/data/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train/RGB/"
+path_train_rgb = "/net/cremi/leanguye/projet-deep-learning-m1/resnet18/data/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train/RGB/"
 x_train, y_train = data_load.load_data_train(path_train_rgb)
 
 #Convertion en tensor et trainloaderpourq
 dataset = data_load.CustomImageDataset(x_train, y_train, transform=None)
 
-test_indices = torch.load("results/test_indices.pth")
+test_indices = torch.load("resnet18/src/resnet18_RGB/results/test_indices.pth")
 test_dataset = torch.utils.data.Subset(dataset, test_indices) #crée un sous-ensemble du dataset original en utilisant une liste d’indices.
 test_loader  = DataLoader(test_dataset, batch_size=batch_size, shuffle=False) #créer les batch sans shuffle à partir du test dataset
 
