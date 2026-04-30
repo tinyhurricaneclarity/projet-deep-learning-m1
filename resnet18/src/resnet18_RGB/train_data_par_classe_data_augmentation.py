@@ -20,7 +20,6 @@ import skimage as ski
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, Subset
-from torchvision.transforms import v2
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import torch.optim as optim
