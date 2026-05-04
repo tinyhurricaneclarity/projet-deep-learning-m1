@@ -60,7 +60,7 @@ print(f"Val   : {len(Val['images'])} images")
 print(f"Test  : {len(Test['images'])} images")
 
 # sauvegarde test loader indices (pour garder les memes indices pour l'évaluation dans eval.py)
-torch.save(dico_train_test, "src/resnet18_RGB/results/split_par_classe.pth") #dictionnaire {"images": np.array(images), "labels": labels}
+torch.save(dico_train_test, "src/resnet18_RGB/results/split_par_classe_data_augmentation.pth") #dictionnaire {"images": np.array(images), "labels": labels}
 
 
 #Convertion en tensor et trainloader
@@ -254,7 +254,7 @@ for (num_epochs, learning_rate, optimizer_name, scheduler_name, step_size, gamma
 
 #Résumé des résultats dans un ficher CSV
 df = pd.DataFrame(results_summary)
-df.to_csv("src/resnet18_RGB/results/grid_search_results_par_classe.csv", index=False)
+df.to_csv("src/resnet18_RGB/results/grid_search_results_par_classe_data_augmentation.csv", index=False)
 print("CSV résultats.")
 
 # Affichage meilleur modèle
