@@ -1,4 +1,6 @@
-"""Train avec grid_search
+"""
+RESNET50 RGB -> SE PLACER DANS LE BON DOSSIER DE TRAVAIL    
+Train avec grid_search
 import des data PAR CLASSE. Hasard dans les classes (Health, Rust, Other)
 AVEC data augmentation
  """
@@ -31,6 +33,7 @@ import model as model_module
 
 #Définition du device et du modèle
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(device)
 
 
 # Import des données train provenant de data.py
@@ -60,7 +63,7 @@ print(f"Val   : {len(Val['images'])} images")
 print(f"Test  : {len(Test['images'])} images")
 
 # sauvegarde test loader indices (pour garder les memes indices pour l'évaluation dans eval.py)
-torch.save(dico_train_test, "src/resnet18_RGB/results/split_par_classe.pth") #dictionnaire {"images": np.array(images), "labels": labels}
+torch.save(dico_train_test, "src/resnet50_RGB/results/split_par_classe.pth") #dictionnaire {"images": np.array(images), "labels": labels}
 
 
 #Convertion en tensor et trainloader
@@ -150,7 +153,7 @@ for (num_epochs, learning_rate, optimizer_name, scheduler_name, step_size, gamma
 
 
     #Dans chaque boucle du grid search : Initialiser le modèle avec les hyperparamètres du grid search
-    model = model_module.ResNet18().to(device) #lance une nouvelle instance du modèle, ca réinitialise tout.
+    model = model_module.ResNet50().to(device) #lance une nouvelle instance du modèle, ca réinitialise tout.
 
     #Configuration des optimizer et scheduler du modèle qu'on vient d'initialiser
 
@@ -230,7 +233,7 @@ for (num_epochs, learning_rate, optimizer_name, scheduler_name, step_size, gamma
         print(f'Epoch [{epoch+1}/{num_epochs}] Train Loss: {train_loss:.4f} | Val Loss: {val_loss:.4f} | Train Acc: {train_acc:.2f}% | Val Acc: {val_acc:.2f}%')
 
     
-      # Optionally, store results for the current configuration
+    # Optionally, store results for the current configuration
     results_summary.append({
         "config": config_str,
         "val_loss": val_loss,
@@ -245,16 +248,16 @@ for (num_epochs, learning_rate, optimizer_name, scheduler_name, step_size, gamma
 
     if val_loss < best_val_loss:
         best_val_loss = val_loss
-        torch.save(model.state_dict(), "src/resnet18_RGB/results/saved_models/best_loss.pth")
+        torch.save(model.state_dict(), "src/resnet50_RGB/results/saved_models/best_loss.pth")
 
     if val_acc > best_val_acc:
         best_val_acc = val_acc
-        torch.save(model.state_dict(), "src/resnet18_RGB/results/saved_models/best_acc.pth")
+        torch.save(model.state_dict(), "src/resnet50_RGB/results/saved_models/best_acc.pth")
 
 
 #Résumé des résultats dans un ficher CSV
 df = pd.DataFrame(results_summary)
-df.to_csv("src/resnet18_RGB/results/grid_search_results_par_classe.csv", index=False)
+df.to_csv("src/resnet50_RGB/results/grid_search_results_par_classe.csv", index=False)
 print("CSV résultats.")
 
 # Affichage meilleur modèle
