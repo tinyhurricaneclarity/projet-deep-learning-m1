@@ -60,7 +60,9 @@ print(f"Val   : {len(Val['images'])} images")
 print(f"Test  : {len(Test['images'])} images")
 
 # sauvegarde test loader indices (pour garder les memes indices pour l'évaluation dans eval.py)
-torch.save(dico_train_test, "src/resnet18_MS/results/split_par_classe_data_augmentation.pth") #dictionnaire {"images": np.array(images), "labels": labels}
+
+os.makedirs("src/resnet18_MS/results", exist_ok=True)
+torch.save(dico_train_test, "src/resnet18_MS/results/split_par_classe_data_augmentation_MS.pth") #dictionnaire {"images": np.array(images), "labels": labels}
 
 
 #Convertion en tensor et trainloader

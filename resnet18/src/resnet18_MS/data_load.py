@@ -1,4 +1,5 @@
-"""On fait des fonctions pour éviter d'avoir des variables gloables qui peuvent poser problèmes"""
+
+"""POUR IMAGES MS - il faut les convertir en float 32 (car MS : uint16 non compatible avec nparray)"""
 
 import numpy as np
 import skimage as ski
@@ -191,7 +192,11 @@ def import_images(class_names, dico, tr_or_te="train"):
 
     for (j, i) in indices:
         tpr_path = f"{dico['path_data']}/{class_names[j]}_hyper_{i}{dico['sufix']}"
-        images.append(ski.io.imread(tpr_path))
+        img = ski.io.imread(tpr_path)
+        img = img.astype(np.float32)  # conversion en float32
+        # normalisation entre 0 et 1
+        img = (img - img.min()) / (img.max() - img.min() + 1e-6)
+        images.append(img)
         labels.append(j)
 
     return {"images": np.array(images), "labels": labels}
@@ -205,13 +210,14 @@ def import_images(class_names, dico, tr_or_te="train"):
 # Pour le train : avec data augmentation dynamique
 # A chaque epoch, une transformation aléatoire différente est appliquée
 # ce qui force le modèle à généraliser plutôt qu'apprendre par coeur
+
 train_transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.RandomHorizontalFlip(),   # flip horizontal aléatoire
     transforms.RandomVerticalFlip(),     # flip vertical aléatoire
     transforms.RandomRotation(15),       # rotation aléatoire jusqu'à 15 degrés
-    transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                         std=[0.229, 0.224, 0.225]) #permet de "lisser" la distribution des tensors (valeurs autour de 0) pour accélérer l’entraînement et rendre l’optimisation plus stable
+    transforms.Normalize(mean=[0.5, 0.5, 0.5, 0.5, 0.5], # 5 canaux en MS !!! valeurs génériques. 
+                         std=[0.5, 0.5, 0.5, 0.5, 0.5]) #permet de "lisser" la distribution des tensors (valeurs autour de 0) pour accélérer l’entraînement et rendre l’optimisation plus stable
 ])
 
 
