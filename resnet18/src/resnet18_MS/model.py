@@ -48,7 +48,7 @@ class ResNet18(nn.Module): #de geeksforgeeks
         self.in_channels = 64 #nombre de canaux d'entrée
 
         #entrée du réseau
-        self.conv1 = nn.Conv2d(5, 64, kernel_size=3, stride=1, padding=1, bias=False) #input 5 canaux pour MS, output (64 features), taille kernel
+        self.conv1 = nn.Conv2d(5, 64, kernel_size=3, stride=1, padding=3, bias=False) #input 5 canaux pour MS, output (64 features), taille kernel
         self.bn1 = nn.BatchNorm2d(64) #noramlisation
         self.relu = nn.ReLU(inplace=True) #fonction activation non linéaire
 
