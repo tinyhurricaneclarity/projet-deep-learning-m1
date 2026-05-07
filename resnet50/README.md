@@ -14,8 +14,9 @@ Les images sont prises par un drone : DJI M600 Pro UAV with an S505 snapshot hyp
 
 # Arborescence
 
+Tous les codes sont à lancer depuis le dossier resnet18.
 ```
-resnet50/
+resnet18/
 │
 ├── data/
 │    data/beyond-visible-spectrum-ai-for-agriculture-2026

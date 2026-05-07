@@ -40,6 +40,8 @@ class BasicBlock(nn.Module):
     
 """Pour la structure des Resnet voir l'article de référence de He et al., 2016"""
 
+"""Self.conv1 padding de 1 fait que la taille de l'aimge en sortie est de 110x110 et pas 112x112 comme attendu dans l'article. modifié dans resnet50"""
+
 class ResNet18(nn.Module): #de geeksforgeeks
     def __init__(self, num_classes=3): #num classes c'est le nombre de classes que va prédire le modèle 
         super().__init__() #super permet d'initialiser la classe parent : nn.Module
