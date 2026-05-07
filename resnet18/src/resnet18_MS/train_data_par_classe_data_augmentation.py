@@ -88,7 +88,7 @@ criterion = nn.CrossEntropyLoss()
 best_val_loss = float('inf') #initialise à l'infini positif (donc un nbr positif tout simplement), parce que la loss est tjrs >0
 best_val_acc = 0
 
-os.makedirs("results/saved_models", exist_ok=True)
+os.makedirs("src/resnet18_MS/results/saved_models", exist_ok=True)
 
 #Grid search des hyperparamètres
 

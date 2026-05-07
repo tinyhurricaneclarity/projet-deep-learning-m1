@@ -13,7 +13,7 @@ import numpy as np
 class BasicBlock(nn.Module): 
     def __init__(self, in_channels, out_channels, stride=1): #stride
         super(BasicBlock, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=3, bias=False)
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(out_channels)
         self.relu = nn.ReLU(inplace=True)
         self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False)
@@ -40,7 +40,7 @@ class BasicBlock(nn.Module):
     
 """Pour la structure des Resnet voir l'article de référence de He et al., 2016"""
 
-"""Self.conv1 padding de 1 fait que la taille de l'aimge en sortie est de 112x112"""
+"""Self.conv1 padding de 1 fait que la taille de l'aimge en sortie est de 110x110 et pas 112x112 comme attendu dans l'article. modifié dans resnet50"""
 
 class ResNet18(nn.Module): #de geeksforgeeks
     def __init__(self, num_classes=3): #num classes c'est le nombre de classes que va prédire le modèle 
