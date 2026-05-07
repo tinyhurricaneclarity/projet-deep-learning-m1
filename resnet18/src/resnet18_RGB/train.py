@@ -24,7 +24,7 @@ from torch.utils.data import DataLoader
 import torch.optim as optim
 
 import data_load
-import model as model_module
+import resnet18.src.resnet18_RGB.model as model_module
 
 
 #Définition du device et du modèle

@@ -1,5 +1,10 @@
 #Evaluation test set
 
+"""RESNET18 Se placer dans le dossier resnet18 pour lancer le code"""
+"""Fichier éval permet de recreéer le split du dataset utilisé pour l'entraintement du modèle. 
+Les indices de split du dataset sont sauvegardés au cours de l'évaluation et le dataset est resplitté selon les indices dans ce fichier.
+Le modèle testé est le meilleur selon la val loss/acc"""
+
 import model
 import torch
 import data_load
@@ -7,28 +12,32 @@ from torch.utils.data import DataLoader
 from sklearn.metrics import f1_score, confusion_matrix, accuracy_score, recall_score, precision_score
 from config import class_names, batch_size
 import numpy as np
+import pandas as pd
 #ne pas faire from train import car quand Python importe depuis train.py, il exécute tout le fichier train.py — y compris la boucle d'entraînement.
 #sinon ajouter dans train.py if __name__ == "__main__":
 
 #Définition du device et du modèle
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = model.ResNet18().to(device) #lance une nouvelle instance du modèle, ca réinitialise tout.
+model = model.ResNet50().to(device) #lance une nouvelle instance du modèle, ca réinitialise tout.
 print(model)
 
 #Chargement du modèle sauvegardé à tester
-model.load_state_dict(torch.load("/autofs/unityaccount/cremi/leanguye/projet-deep-learning-m1/resnet18/results/saved_models/best_acc.pth"))
+model.load_state_dict(torch.load("src/resnet50_RGB/results/saved_models/best_acc_RGB_data_aug_50.pth"))
 
-#Import des datasets train, val et test 
+#Import du test dataset (meme prcoédure que dans train, appliqué sur test)
 
 path_train_rgb = "/net/cremi/leanguye/projet-deep-learning-m1/resnet18/data/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train/RGB/"
-x_train, y_train = data_load.load_data_train(path_train_rgb)
 
-#Convertion en tensor et trainloaderpourq
-dataset = data_load.CustomImageDataset(x_train, y_train, transform=None)
 
-test_indices = torch.load("resnet18/src/resnet18_RGB/results/test_indices.pth")
-test_dataset = torch.utils.data.Subset(dataset, test_indices) #crée un sous-ensemble du dataset original en utilisant une liste d’indices.
-test_loader  = DataLoader(test_dataset, batch_size=batch_size, shuffle=False) #créer les batch sans shuffle à partir du test dataset
+class_names = ["Health", "Rust", "Other"]
+Im_type     = "RGB"
+Num_data    = 600  # 200 images par classe
+
+split = torch.load("src/resnet50_RGB/results/split_par_classe_RGB_data_aug_50.pth") #dictionnaire qui renvoit {"test":(classe, indice), val..., train...}
+test  = data_load.import_images(class_names, split, "test") #renvoie uniquement les tuples de "test"
+test_dataset = data_load.CustomImageDataset(test['images'], test['labels'], transform=data_load.eval_transform)
+test_loader  = DataLoader(test_dataset,  batch_size=batch_size, shuffle=False)
+
 
 print("Evaluation sur le jeu de test\n")
 
@@ -50,10 +59,10 @@ with torch.no_grad():
 # Accuracy, recall, precision
 
 metrics = {
-    "Accuracy": accuracy_score,
-    "Precision": lambda y, p: precision_score(y, p, average="macro"),
-    "Recall": lambda y, p: recall_score(y, p, average="macro"), 
-    "F1-score macro": lambda y, p: f1_score(y, p, average="macro") 
+    "Accuracy":       accuracy_score(all_labels, all_preds),
+    "Precision":      precision_score(all_labels, all_preds, average="macro"),
+    "Recall":         recall_score(all_labels, all_preds, average="macro"),
+    "F1-score macro": f1_score(all_labels, all_preds, average="macro"),
 }
 
 for name, function in metrics.items():
@@ -61,14 +70,18 @@ for name, function in metrics.items():
     print(f"{name} : {score:.4f}%")
 
 
-# F1-score par classe
+# F1 par classe → ajout dans le même dict
 f1_par_classe = f1_score(all_labels, all_preds, average=None)
 for i, classe in enumerate(class_names):
-    print(f"F1-score {classe} : {f1_par_classe[i]:.4f}")
+    metrics[f"F1_{classe}"] = f1_par_classe[i]
+
+
+# Sauvegarde métriques globales + par classe
+df_metrics = pd.DataFrame([metrics])
+df_metrics.to_csv("results/eval_metrics.csv", index=False)
 
 # Matrice de confusion
 cm = confusion_matrix(all_labels, all_preds)
-print("Matrice de confusion :")
-print(cm)
-
+df_cm = pd.DataFrame(cm, index =class_names, columns=class_names)
+df_cm.to_csv("src/resnet18_MS/results/confusion_matrix.csv")
 
