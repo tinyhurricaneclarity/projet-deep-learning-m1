@@ -114,7 +114,7 @@ def pourcent_to_prop(pourcent):
     return pourcent if pourcent < 1 else pourcent / 100
 
 
-def alea_train_test(Num_data, class_names, n_val=99, n_test=99):
+def alea_train_test(Num_data, class_names, n_val=99, n_test=99): #dictionnaire qui renvoit un tuple {"test":(classe, indice)}
     """
     Crée un split aléatoire des données en train / validation / test
     EN TIRANT AU SORT A L'INTERIEUR DE CHAQUE CLASSE.
@@ -135,9 +135,9 @@ def alea_train_test(Num_data, class_names, n_val=99, n_test=99):
     val_indices   = []
     test_indices  = []
 
-    for j in range(len(class_names)):
+    for j in range(len(class_names)): #3
         # tirage au sort des indices POUR CETTE CLASSE uniquement
-        indices = random.sample(range(1, n_per_class + 1), n_per_class)
+        indices = random.sample(range(1, n_per_class + 1), n_per_class) #200
 
         # val : les 33 premiers indices tirés au sort
         val_indices.extend([(j, indices[i]) for i in range(n_val_per_class)])

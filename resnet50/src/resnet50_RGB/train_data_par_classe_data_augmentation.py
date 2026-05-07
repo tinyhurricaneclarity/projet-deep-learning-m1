@@ -63,7 +63,7 @@ print(f"Val   : {len(Val['images'])} images")
 print(f"Test  : {len(Test['images'])} images")
 
 # sauvegarde test loader indices (pour garder les memes indices pour l'évaluation dans eval.py)
-torch.save(dico_train_test, "src/resnet50_RGB/results/split_par_classe.pth") #dictionnaire {"images": np.array(images), "labels": labels}
+torch.save(dico_train_test, "src/resnet50_RGB/results/split_par_classe_RGB_50.pth") #dictionnaire {"images": np.array(images), "labels": labels}
 
 
 #Convertion en tensor et trainloader
@@ -248,11 +248,12 @@ for (num_epochs, learning_rate, optimizer_name, scheduler_name, step_size, gamma
 
     if val_loss < best_val_loss:
         best_val_loss = val_loss
-        torch.save(model.state_dict(), "src/resnet50_RGB/results/saved_models/best_loss.pth")
+        torch.save(model.state_dict(), "src/resnet50_RGB/results/saved_models/best_loss_RGB_data_aug_50.pth")
 
     if val_acc > best_val_acc:
         best_val_acc = val_acc
-        torch.save(model.state_dict(), "src/resnet50_RGB/results/saved_models/best_acc.pth")
+        torch.save(model.state_dict(), "src/resnet50_RGB/results/saved_models/best_acc_RGB_data_aug_50.pth")
+
 
 
 #Résumé des résultats dans un ficher CSV
