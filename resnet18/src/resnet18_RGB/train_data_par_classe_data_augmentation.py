@@ -26,7 +26,7 @@ import torch.optim as optim
 import random
 
 import data_load
-import resnet18.src.resnet18_RGB.model as model_module
+import model as model_module
 
 
 #Définition du device et du modèle

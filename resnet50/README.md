@@ -79,11 +79,12 @@ Intégré au processeur (iGPU) : Intel UHD Graphics 770
 
 # Ce qu'il reste à faire
 
+UPDATE 11 05 : lancement 18 MS avec bonnes boucles et test
+ d'ici la fin de la semaine
+Relancer les resnet18 RGB et MS avec bonnes couches d'entrée et boucle de test
+50 MS et HS
 
-
-faire sauvegarde des résultats de test. affichage graphique de la matrice de confusion ?
-
-Faire analyse des résultats avec histogramme et heatmap
+18 + 50 avec les 3 types d'images
 
 
 POur aller plus loin : analyse statistiques corrélation entre couleur des pixels et classe
