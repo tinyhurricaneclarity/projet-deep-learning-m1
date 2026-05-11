@@ -1,5 +1,10 @@
 #Evaluation test set
 
+"""RESNET18 Se placer dans le dossier resnet18 pour lancer le code"""
+"""Fichier éval permet de recreéer le split du dataset utilisé pour l'entraintement du modèle. 
+Les indices de split du dataset sont sauvegardés au cours de l'évaluation et le dataset est resplitté selon les indices dans ce fichier.
+Le modèle testé est le meilleur selon la val loss/acc"""
+
 import model
 import torch
 import data_load
@@ -12,23 +17,26 @@ import numpy as np
 
 #Définition du device et du modèle
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = model.ResNet18().to(device) #lance une nouvelle instance du modèle, ca réinitialise tout.
+model = model.ResNet50().to(device) #lance une nouvelle instance du modèle, ca réinitialise tout.
 print(model)
 
 #Chargement du modèle sauvegardé à tester
-model.load_state_dict(torch.load("/autofs/unityaccount/cremi/leanguye/projet-deep-learning-m1/resnet18/results/saved_models/best_acc.pth"))
+model.load_state_dict(torch.load("src/resnet50_RGB/results/saved_models/best_acc_RGB_data_aug_50.pth"))
 
-#Import des datasets train, val et test 
+#Import du test dataset (meme prcoédure que dans train, appliqué sur test)
 
 path_train_rgb = "/net/cremi/leanguye/projet-deep-learning-m1/resnet18/data/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train/RGB/"
-x_train, y_train = data_load.load_data_train(path_train_rgb)
 
-#Convertion en tensor et trainloaderpourq
-dataset = data_load.CustomImageDataset(x_train, y_train, transform=None)
 
-test_indices = torch.load("resnet18/src/resnet18_RGB/results/test_indices.pth")
-test_dataset = torch.utils.data.Subset(dataset, test_indices) #crée un sous-ensemble du dataset original en utilisant une liste d’indices.
-test_loader  = DataLoader(test_dataset, batch_size=batch_size, shuffle=False) #créer les batch sans shuffle à partir du test dataset
+class_names = ["Health", "Rust", "Other"]
+Im_type     = "RGB"
+Num_data    = 600  # 200 images par classe
+
+split = torch.load("src/resnet50_RGB/results/split_par_classe_RGB_data_aug_50.pth") #dictionnaire qui renvoit {"test":(classe, indice), val..., train...}
+test  = data_load.import_images(class_names, split, "test") #renvoie uniquement les tuples de "test"
+test_dataset = data_load.CustomImageDataset(test['images'], test['labels'], transform=data_load.eval_transform)
+test_loader  = DataLoader(test_dataset,  batch_size=batch_size, shuffle=False)
+
 
 print("Evaluation sur le jeu de test\n")
 
