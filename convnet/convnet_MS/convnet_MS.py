@@ -1,5 +1,5 @@
 # convnet_MS.py
-# ConvNet from scratch sur images HS 32x32
+# ConvNet from scratch sur images MS 64x64
 
 # Objectif : entraîner un réseau de neurones convolutif (ConvNet) from scratch sur les images MS du dataset.
 # Le modèle doit classifier les images en 3 classes : Health, Rust, Other
@@ -185,6 +185,8 @@ Num_data    = 600
 path = "/home/mona/Documents/Projet/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train"
 
 random.seed(42)
+torch.manual_seed(42)
+torch.cuda.manual_seed_all(42)
 dico_train_test = alea_train_test(Num_data, class_names, n_val=99, n_test=99)
 sufix_and_path(Im_type, dico_train_test, path)
 
