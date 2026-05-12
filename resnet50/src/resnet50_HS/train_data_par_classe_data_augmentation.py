@@ -63,7 +63,7 @@ print(f"Val   : {len(Val['images'])} images")
 print(f"Test  : {len(Test['images'])} images")
 
 # sauvegarde test loader indices (pour garder les memes indices pour l'évaluation dans eval.py)
-os.makedirs("src/resnet50_HS/results", exist_ok=True)
+os.makedirs("src/resnet50_HdS/results", exist_ok=True)
 torch.save(dico_train_test, "src/resnet50_HS/results/split_par_classe_HS_50.pth") #dictionnaire {"images": np.array(images), "labels": labels}
 
 

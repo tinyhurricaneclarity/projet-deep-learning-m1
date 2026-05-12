@@ -79,15 +79,9 @@ Intégré au processeur (iGPU) : Intel UHD Graphics 770
 
 # Ce qu'il reste à faire
 
-UPDATE 11 05 : lancement 18 MS avec bonnes boucles et test
-d'ici la fin de la semaine
-Relancer les resnet18 RGB et MS avec bonnes couches d'entrée et boucle de test
-50 MS et HS (code fait)
-
-18 + 50 avec les 3 types d'images
+UPDATE 11 05 : lancement de tous les codes avec boucle test et val et epoch 50/100 pour comparer 
 
 ajouter les configs correspondants aux meilleurs val loss/acc
-
 
 POur aller plus loin : analyse statistiques corrélation entre couleur des pixels et classe
 grad cam
