@@ -46,11 +46,13 @@ class ResNet18(nn.Module): #de geeksforgeeks
     def __init__(self, num_classes=3): #num classes c'est le nombre de classes que va prédire le modèle 
         super().__init__() #super permet d'initialiser la classe parent : nn.Module
         self.in_channels = 64 #nombre de canaux d'entrée
-
-        #entrée du réseau
-        self.conv1 = nn.Conv2d(5, 64, kernel_size=3, stride=1, padding=3, bias=False) #input 5 canaux pour MS, output (64 features), taille kernel
+        
+        #entrée du réseau d'après he et al 2016
+        self.conv1 = nn.Conv2d(5, 64, kernel_size=7, stride=2, padding=3, bias=False) #input=125 pour HS, output (64 features), taille kernel.
         self.bn1 = nn.BatchNorm2d(64) #noramlisation
         self.relu = nn.ReLU(inplace=True) #fonction activation non linéaire
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1) #prend la valeur max dans un kernel de 3x3, pas de 2. La taille de l'image est divisée par deux.
+
 
 
         #4 blocs du ResNet : chaque layer correspond à un groupe de bloc résiduel

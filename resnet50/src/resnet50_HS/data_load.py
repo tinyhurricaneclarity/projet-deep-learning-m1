@@ -1,5 +1,5 @@
 
-"""POUR IMAGES HS - """
+"""POUR IMAGES HS"""
 
 import numpy as np
 import skimage as ski

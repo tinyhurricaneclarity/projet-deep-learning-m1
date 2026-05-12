@@ -26,7 +26,7 @@ import torch.optim as optim
 import random
 
 import data_load
-import resnet18.src.resnet18_RGB.model as model_module
+import model as model_module
 
 
 #Définition du device et du modèle
@@ -92,7 +92,7 @@ os.makedirs("results/saved_models", exist_ok=True)
 
 #Syntaxe pour futur grid search
 grid_params = {
-    "num_epochs": [50],
+    "num_epochs": [50,100],
     "learning_rate": [0.001, 0.0001],
     "optimizer": ["Adam", "SGD"],
     "scheduler": ["StepLR", "ReduceLROnPlateau"],
@@ -245,11 +245,11 @@ for (num_epochs, learning_rate, optimizer_name, scheduler_name, step_size, gamma
 
     if val_loss < best_val_loss:
         best_val_loss = val_loss
-        torch.save(model.state_dict(), "src/resnet18_RGB/results/saved_models/best_loss.pth")
+        torch.save(model.state_dict(), "src/resnet18_RGB/results/saved_models/best_loss_par_classe.pth")
 
     if val_acc > best_val_acc:
         best_val_acc = val_acc
-        torch.save(model.state_dict(), "src/resnet18_RGB/results/saved_models/best_acc.pth")
+        torch.save(model.state_dict(), "src/resnet18_RGB/results/saved_models/best_acc_par_classe.pth")
 
 
 #Résumé des résultats dans un ficher CSV
