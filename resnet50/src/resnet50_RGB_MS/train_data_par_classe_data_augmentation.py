@@ -1,5 +1,5 @@
 """
-RESNET50 RGB -> SE PLACER DANS LE BON DOSSIER DE TRAVAIL    
+RESNET50 RGB MS -> SE PLACER DANS LE BON DOSSIER DE TRAVAIL    
 Train avec grid_search
 import des data PAR CLASSE. Hasard dans les classes (Health, Rust, Other)
 AVEC data augmentation
@@ -95,7 +95,7 @@ os.makedirs("src/resnet50_RGB/results/saved_models", exist_ok=True)
 
 #Syntaxe pour futur grid search
 grid_params = {
-    "num_epochs": [5, 100],
+    "num_epochs": [50, 100],
     "learning_rate": [0.001, 0.0001],
     "optimizer": ["Adam", "SGD"],
     "scheduler": ["StepLR", "ReduceLROnPlateau"],

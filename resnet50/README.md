@@ -79,7 +79,8 @@ Intégré au processeur (iGPU) : Intel UHD Graphics 770
 
 # Ce qu'il reste à faire
 
-UPDATE 11 05 : lancement de tous les codes avec boucle test et val et epoch 50/100 pour comparer 
+UPDATE 12 05 : lancement de tous les codes avec boucle test et val et epoch 50/100 pour comparer 
+pour 13 05 : analyser les résultats. LAncer les modèles aux images combinées. et resnet50 RGB avec 100 epochs
 
 ajouter les configs correspondants aux meilleurs val loss/acc
 
