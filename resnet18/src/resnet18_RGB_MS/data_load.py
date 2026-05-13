@@ -158,22 +158,6 @@ def alea_train_test(Num_data, class_names, n_val=99, n_test=99):
     }
 
 
-def sufix_and_path(Im_type, dico, path):
-    """
-    Ajoute au dictionnaire le suffixe et le chemin correspondant au type d'image.
-    RGB -> .png / MS et HS -> .tif
-    """
-    if Im_type == "RGB":
-        dico["sufix"]     = ".png"
-        dico["path_data"] = f"{path}/RGB"
-    else:
-        dico["sufix"] = ".tif"
-        if Im_type == "MS":
-            dico["path_data"] = f"{path}/MS"
-        elif Im_type == "HS":
-            dico["path_data"] = f"{path}/HS"
-        else:
-            print("Forme inconnue")
 
 
 def import_images(class_names, dico, tr_or_te="train"):

@@ -13,7 +13,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.metrics import precision_score, recall_score, f1_score
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 import skimage as ski
 
 import torch
@@ -229,17 +229,6 @@ for (num_epochs, learning_rate, optimizer_name, scheduler_name, step_size, gamma
         
         print(f'Epoch [{epoch+1}/{num_epochs}] Train Loss: {train_loss:.4f} | Val Loss: {val_loss:.4f} | Train Acc: {train_acc:.2f}% | Val Acc: {val_acc:.2f}%')
 
-    
-      # Optionally, store results for the current configuration
-    results_summary.append({
-        "config": config_str,
-        "val_loss": val_loss,
-        "val_acc": val_acc,
-        "train_loss": train_loss,
-        "train_acc": train_acc,
-        "optimizer": optimizer_name,
-        "scheduler": scheduler_name
-})
 
     #Sauvegarde du meilleur modèle sur base loss et acc (ancien modèle écrasé si meilleur)
 
@@ -250,6 +239,41 @@ for (num_epochs, learning_rate, optimizer_name, scheduler_name, step_size, gamma
     if val_acc > best_val_acc:
         best_val_acc = val_acc
         torch.save(model.state_dict(), "src/resnet18_RGB/results/saved_models/best_acc_par_classe.pth")
+
+      #Test pour chaque config
+    model.eval()
+    all_preds  = []
+    all_labels = []
+
+    with torch.no_grad():
+        for images, labels in test_loader:
+            images       = images.to(device)
+            labels       = labels.squeeze() #nettoyage
+            outputs      = model(images) #prédiction par le modèle sur les images du test set. sortie : [batch_size, nb_classes]. ex : [32, 3] → 3 classes
+            _, predicted = torch.max(outputs, 1) #torch.max(input, dim). Dans la dimension 1 de outputs (donc les classes), on prend la classe avec la plus grande probabilité (torch.max retourne deux valeurs : (max_value, max_index))
+            all_preds.extend(predicted.cpu().numpy()) #stockage des prédictions sous forme numpy. .extend permet d'ajouter plusieurs éléments à une liste
+            all_labels.extend(labels.numpy()) #stockage des vrais labels
+
+
+    #ajout des résultats dans un dictionnaire
+    f1_par_classe = f1_score(all_labels, all_preds, average=None)
+    results_summary.append({
+        
+        "config": config_str,
+        "val_loss": val_loss,
+        "val_acc": val_acc,
+        "train_loss": train_loss,
+        "train_acc": train_acc,
+        "optimizer": optimizer_name,
+        "scheduler": scheduler_name,
+        "accuracy": accuracy_score(all_labels, all_preds),
+        "precision": precision_score(all_labels, all_preds, average="macro"),
+        "recall": recall_score(all_labels, all_preds, average="macro"),
+        "f1_macro": f1_score(all_labels, all_preds, average="macro"),
+        "f1_Health":   f1_par_classe[0],
+        "f1_Rust":     f1_par_classe[1],
+        "f1_Other":    f1_par_classe[2]
+    })
 
 
 #Résumé des résultats dans un ficher CSV

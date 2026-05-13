@@ -54,7 +54,7 @@ class ResNet50(nn.Module):
         self.in_channels = 64 #nombre de canaux attendus en entrée du premier bloc résiduel
 
         ##entrée du réseau d'après he et al 2016
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False) #input, output (64 features), taille kernel. padding 3 pour avoir 112x112 en sortie
+        self.conv1 = nn.Conv2d(133, 64, kernel_size=7, stride=2, padding=3, bias=False) #input, output (64 features), taille kernel. padding 3 pour avoir 112x112 en sortie
         self.bn1 = nn.BatchNorm2d(64) #noramlisation
         self.relu = nn.ReLU(inplace=True) #fonction activation non linéaire
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1) #prend la valeur max dans un kernel de 3x3, pas de 2. La taille de l'image est divisée par deux.

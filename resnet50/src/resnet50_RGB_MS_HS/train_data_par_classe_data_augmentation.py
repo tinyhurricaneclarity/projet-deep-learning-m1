@@ -41,7 +41,6 @@ print(device)
 ### CHOIX DES INPUTS ET PARAMETRES
 
 class_names = ["Health", "Rust", "Other"]
-Im_type     = "RGB"
 Num_data    = 600  # 200 images par classe
 
 path = "/net/cremi/leanguye/projet-deep-learning-m1/resnet18/data/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train"
@@ -49,8 +48,11 @@ path = "/net/cremi/leanguye/projet-deep-learning-m1/resnet18/data/beyond-visible
 # Fabrication du split aléatoire PAR CLASSE
 # 99 val (33 par classe) + 99 test (33 par classe) + 402 train (134 par classe)
 dico_train_test = data_load.alea_train_test(Num_data, class_names, n_val=99, n_test=99)
-data_load.sufix_and_path(Im_type, dico_train_test, path)
 
+# Chemins vers les modalités
+dico_train_test["path_data_rgb"] = f"{path}/RGB"
+dico_train_test["path_data_ms"]  = f"{path}/MS"
+dico_train_test["path_data_hs"]  = f"{path}/HS"
 
 
 # Chargement des images
@@ -63,7 +65,8 @@ print(f"Val   : {len(Val['images'])} images")
 print(f"Test  : {len(Test['images'])} images")
 
 # sauvegarde test loader indices (pour garder les memes indices pour l'évaluation dans eval.py)
-torch.save(dico_train_test, "src/resnet50_RGB/results/split_par_classe_RGB_50.pth") #dictionnaire {"images": np.array(images), "labels": labels}
+os.makedirs("src/resnet50_RGB_MS_HS/results", exist_ok=True)
+torch.save(dico_train_test, "src/resnet50_RGB_MS_HS/results/split_par_classe_RGB_MS_HS_50.pth") #dictionnaire {"images": np.array(images), "labels": labels}
 
 
 #Convertion en tensor et trainloader
@@ -89,7 +92,7 @@ criterion = nn.CrossEntropyLoss()
 best_val_loss = float('inf') #initialise à l'infini positif (donc un nbr positif tout simplement), parce que la loss est tjrs >0
 best_val_acc = 0
 
-os.makedirs("src/resnet50_RGB/results/saved_models", exist_ok=True)
+os.makedirs("src/resnet50_RGB_MS_HS/results/saved_models", exist_ok=True)
 
 #Grid search des hyperparamètres
 
@@ -236,11 +239,11 @@ for (num_epochs, learning_rate, optimizer_name, scheduler_name, step_size, gamma
 
     if val_loss < best_val_loss:
         best_val_loss = val_loss
-        torch.save(model.state_dict(), "src/resnet50_RGB/results/saved_models/best_loss_RGB_data_aug_50.pth")
+        torch.save(model.state_dict(), "src/resnet50_RGB_MS_HS/results/saved_models/best_loss_RGB_MS_HS_data_aug_50.pth")
 
     if val_acc > best_val_acc:
         best_val_acc = val_acc
-        torch.save(model.state_dict(), "src/resnet50_RGB/results/saved_models/best_acc_RGB_data_aug_50.pth")
+        torch.save(model.state_dict(), "src/resnet50_RGB_MS_HS/results/saved_models/best_acc_RGB_MS_HS_data_aug_50.pth")
 
 
       #Test pour chaque config
@@ -280,7 +283,7 @@ for (num_epochs, learning_rate, optimizer_name, scheduler_name, step_size, gamma
 
 #Résumé des résultats dans un ficher CSV
 df = pd.DataFrame(results_summary)
-df.to_csv("src/resnet50_RGB/results/grid_search_results_data_aug_RGB_50.csv", index=False)
+df.to_csv("src/resnet50_RGB_MS_HS/results/grid_search_results_data_aug_RGB_MS_HS_50.csv", index=False)
 print("CSV résultats.")
 
 # Affichage meilleur modèle
