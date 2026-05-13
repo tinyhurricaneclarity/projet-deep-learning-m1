@@ -1,0 +1,8 @@
+# Modèles PyTorch
+saved_models/**/*.pth
+pretrain/saved_models/*.pth
+
+# Fichiers temporaires Python
+__pycache__/
+*.pyc
+*.pyo
