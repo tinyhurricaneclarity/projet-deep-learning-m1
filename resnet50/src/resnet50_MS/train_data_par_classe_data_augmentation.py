@@ -281,7 +281,7 @@ for (num_epochs, learning_rate, optimizer_name, scheduler_name, step_size, gamma
 
 #Résumé des résultats dans un ficher CSV
 df = pd.DataFrame(results_summary)
-df.to_csv("src/resnet50_MS/results/grid_search_results_par_classe_MS_50.csv", index=False)
+df.to_csv("src/resnet50_MS/results/grid_search_results_data_aug_MS_50.csv", index=False)
 print("CSV résultats.")
 
 # Affichage meilleur modèle
