@@ -1,0 +1,2 @@
+config,val_loss,val_acc,train_loss,train_acc,optimizer,scheduler,accuracy,precision,recall,f1_macro,f1_Health,f1_Rust,f1_Other,learning_rate,step,gamma
+config30_epochs50_lr0.0001_optSGD_schedReduceLROnPlateau_step30_gamma0.1,0.882956634868275,60.60606060606061,0.8097366500849748,62.6865671641791,SGD,ReduceLROnPlateau,0.5454545454545454,0.5394871794871795,0.5454545454545454,0.5382578318683796,0.4137931034482758,0.5833333333333334,0.6176470588235294,0.0001,30,0.1

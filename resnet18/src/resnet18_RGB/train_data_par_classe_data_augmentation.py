@@ -199,7 +199,7 @@ for (num_epochs, learning_rate, optimizer_name, scheduler_name, step_size, gamma
         train_losses.append(train_loss)
         train_acc_list.append(train_acc)
 
-    #évaluation des train et val
+    #évaluation
 
         model.eval()
         correct, total = 0, 0
