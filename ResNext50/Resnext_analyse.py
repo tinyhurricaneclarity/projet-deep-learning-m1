@@ -9,38 +9,21 @@ Created on Mon May  4 13:42:57 2026
 ### SAISIE des PARAMETRES ###
 
 class_names = ["Health","Rust","Other"] # classes présentes
-Im_type = ["HS","RGB","MS"]                # "RGB","MS","HS"
-Num_data = 600           # Nombre d'images dans les datas. Normalement, c'est un multiple du nomùbre de classe ayant un jeu de datas parfaitement équilibré
-proportion_train = 70        # proportion des datas à mettre dans train en % ou proportion
-proportion_validation = 10
-proportion_test = 20              # proportion des datas à mettre dans test en % ou proportion
+Im_type = ["RGB","MS","HS","concat"]                # "RGB","MS","HS"
 
 path = "/net/cremi/mvoiturin/projet/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train"
 #!ls /content/Kaggle_Prepared/train/RGB
 
-#Hyperparamètres
-#On retient ces hyperparamètres, mais il y en a d'autres
 
-grid_params = {
-   "num_epochs": [100],#"10," # on garde
-   "cardinality" : [16,32,48], # on garde
-   "learning_rate": [0.001, 0.0001],#"0.001," # on garde
-   "bwidth" : [3,4,5],
-   "batch_size": [ 32],#"32,"
-   #"num_blocks": [ 10,12],#"10,"
-   #"base_channels": [ 32,64],#"32,"
-   "kernel_size": [3]#", 5"
+ext = "_augm_F1"
+seuil = {"RGB":0.5,"MS":0.5,"HS":0.5,"concat":0.5}
 
-}
-
-ext = "_avec_augm"
-seuil = {"RGB":0.5,"MS":0.5,"HS":0.5}
-
-call_figures = {
+call_figures = "none"
+"""{
     "RGB":["config3_epochs100_cardinality16_learningrate0.001_bwidth3_batch_size32_im_type_RGB"],
     "MS":["config2_epochs100_cardinality16_learningrate0.0001_bwidth5_batch_size32_im_type_MS"],
     "HS":["config0_epochs100_cardinality16_learningrate0.0001_bwidth3_batch_size32_im_type_HS"],
-    }
+    }"""
 
 path_saved_data = "/net/cremi/mvoiturin/Bureau/projet-deep-learning-m1/ResNext50/saved_model"
 
@@ -90,7 +73,7 @@ for i in Im_type :
     elif i=="HS" :
       file = f"{path_saved_data}/resultats_HS{ext}.json"
     else:
-      file = f"{path_saved_data}/resultats_concat{spec_para}.json"
+      file = f"{path_saved_data}/resultats_concat{ext}.json"
         
     tf = open(file, "r")
     resultats = json.load(tf)
@@ -154,6 +137,18 @@ for i in Im_type :
            plt.show()
       
     print("")
+    
+    print("Evaluation sur le jeu de test.")
+
+    print(f"F1-score macro : {resultats[i]['f1']:.4f}")
+    
+    print("Matrice de confusion :")
+    print(resultats[i]["cm"])
+
+    print("")
+    
+    for classe in class_names :
+        print(resultats[i][f"F1-score_{classe}"])
     
     #meilleurs paramètres :
     
