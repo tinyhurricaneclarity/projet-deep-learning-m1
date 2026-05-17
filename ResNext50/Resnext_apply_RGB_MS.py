@@ -6,7 +6,7 @@
 class_names = ["Health","Rust","Other"] # classes présentes
 
 #type d'image :
-Im_type = "RGB_MS_HS"                 # "RGB","MS,"HS"
+Im_type = "concat"                 # "RGB","MS,"HS"
 
 #Nombre d'image :
 Num_data = 600           # Nombre d'images dans les datas. Normalement, c'est un multiple du nomùbre de classe ayant un jeu de datas parfaitement équilibré
@@ -42,7 +42,7 @@ grid_params = {
 seuil = 1
 
 #extention de nom d'enregistrement du dictionnaire résumant le grid search
-spec_para = "_avec_augm"
+spec_para = "_augm_F1"
 #chemin vers le dossier de sauvegardes:
 path_saved_data = "/net/cremi/mvoiturin/Bureau/projet-deep-learning-m1/ResNext50/saved_model"
 
@@ -51,13 +51,13 @@ path_saved_data = "/net/cremi/mvoiturin/Bureau/projet-deep-learning-m1/ResNext50
 #chemin vers le dossier du modèle sauvegardé :
 fichier = "/net/cremi/mvoiturin/Bureau/projet-deep-learning-m1/ResNext50/saved_model"
 #nom du modèle sauvegardé et indices :
-nom_modele = "modelconfig3_epochs100_cardinality16_learningrate0.001_bwidth3_batch_size32_im_type_RGB_epoch100.pth"
+nom_modele = "modelconfig0_epochs100_cardinality16_learningrate0.0001_bwidth3_batch_size32_im_type_RGB_MS_HS_epoch100.pth"
 ind_cardinality_modele = 16
 ind_bwidth_modele = 3
 
 
 #etapes
-etapes = [1,2,3] # de 1 à 3
+etapes = [1,2,3,4] # de 1 à 3
 #seed de Random
 seed_id = 42
 
@@ -538,6 +538,7 @@ if 1 in etapes:
     #stockage de résultats
     resultats = {}
     
+    
     if 2 in etapes :
         for i in dico_config :
           print(f"Running config : {i}")
@@ -663,6 +664,31 @@ if 1 in etapes:
           resultats[i]["best_val_acc"] = best_val_acc
           resultats[i]["best_epoch"] = best_epoch
         
+          
+          print("Evaluation sur le jeu de test.")
+          model.eval()
+          all_preds  = []
+          all_labels = []
+
+          with torch.no_grad():
+              for images, labels in test_loader:
+                  images       = images.to(device)
+                  labels       = labels.squeeze()
+                  outputs      = model(images)
+                  _, predicted = torch.max(outputs, 1)
+                  all_preds.extend(predicted.cpu().numpy())
+                  all_labels.extend(labels.numpy())
+
+          resultats[i]["f1"] = f1_score(all_labels, all_preds, average="macro")
+          print(f"F1-score macro : {resultats[i]['f1']:.4f}")
+
+          resultats[i]["cm"] = confusion_matrix(all_labels, all_preds)
+
+          f1_par_classe = f1_score(all_labels, all_preds, average=None)
+          for k, classe in enumerate(class_names):
+              resultats[i][f"F1-score_{classe}"] = f"{f1_par_classe[k]:.4f}"
+        
+        
           if test_acc>seuil :
             #Stocker le modèle à la fin de chaque epoch pour pouvoir comparer les loss entre les hyperparamètres
             
@@ -680,7 +706,13 @@ if 1 in etapes:
               file = f"{path_saved_data}/concat"
             
             model_save_path = os.path.join(file,f"model{i}_epoch{config['num_epochs']}.pth")
-        
+            
+            if 4 in etapes :
+                nom_modele = f"model{i}_epoch{config['num_epochs']}.pth"
+                ind_cardinality_modele = config["cardinality"]
+                ind_bwidth_modele = config["bwidth"]
+
+            
             torch.save(model.state_dict(), model_save_path)
             print(f"Model saved to {model_save_path}")
           print("")
