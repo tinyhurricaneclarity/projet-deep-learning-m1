@@ -1,4 +1,4 @@
-dconfig,val_loss,val_acc,train_loss,train_acc,optimizer,scheduler
+config,val_loss,val_acc,train_loss,train_acc,optimizer,scheduler
 config0_epochs50_lr0.001_optAdam_schedStepLR_step20_gamma0.1,0.9810084008207225,51.515151515151516,0.756544165646852,65.17412935323384,Adam,StepLR
 config1_epochs50_lr0.001_optAdam_schedStepLR_step20_gamma0.5,1.6874486822070498,43.43434343434343,0.38155395830448585,85.07462686567165,Adam,StepLR
 config2_epochs50_lr0.001_optAdam_schedStepLR_step30_gamma0.1,1.4109268116228508,54.54545454545455,0.4562315626523981,82.33830845771145,Adam,StepLR

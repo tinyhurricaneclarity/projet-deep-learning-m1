@@ -58,7 +58,7 @@ os.makedirs("results/saved_models", exist_ok=True)
 
 #Syntaxe pour futur grid search
 grid_params = {
-    "num_epochs": [50],
+    "num_epochs": [50,100],
     "learning_rate": [0.001, 0.0001],
     "optimizer": ["Adam", "SGD"],
     "scheduler": ["StepLR", "ReduceLROnPlateau"],

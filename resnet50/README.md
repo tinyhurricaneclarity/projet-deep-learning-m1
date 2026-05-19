@@ -79,21 +79,14 @@ Intégré au processeur (iGPU) : Intel UHD Graphics 770
 
 # Ce qu'il reste à faire
 
+pour 13 05 : analyser les résultats. LAncer les modèles aux images combinées. et resnet50 RGB avec 100 epochs
 
-
-faire sauvegarde des résultats de test. affichage graphique de la matrice de confusion ?
-
-Faire analyse des résultats avec histogramme et heatmap
-
+ajouter les configs correspondants aux meilleurs val loss/acc 
+ATTENTION : Extrairement seulement les meilleurs résultats avec configs SGD et lr de 0,0001 (pas de overfitting)
 
 POur aller plus loin : analyse statistiques corrélation entre couleur des pixels et classe
 grad cam
 
-Résumer les résultats sur overleaf
-
-faire comparaison resnet 50
-
-changer l'arborescence
 
 # Protocole expérimental
 
