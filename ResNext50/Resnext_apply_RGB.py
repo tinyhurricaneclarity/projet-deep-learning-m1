@@ -27,10 +27,10 @@ path = "/net/cremi/mvoiturin/projet/beyond-visible-spectrum-ai-for-agriculture-2
 #Hyperparamètres de ResNext50
 #On retient ces hyperparamètres, mais il y en a d'autres
 grid_params = {
-   "num_epochs": [100],#"10," # on garde
-   "cardinality" : [16,32,48], # on garde
-   "learning_rate": [0.001,0.0001],#"0.001," # on garde
-   "bwidth" : [3,4,5],
+   "num_epochs": [100],#
+   "cardinality" : [16,32,48], # 16,32,48
+   "learning_rate": [0.001,0.0001],#0.001,0.0001
+   "bwidth" : [3,4,5],#3,4,5
    "batch_size": [32],#"32,"
    #"num_blocks": [ 10,12],#"10,"
    #"base_channels": [ 32,64],#"32,"
@@ -42,7 +42,7 @@ grid_params = {
 seuil = 1
 
 #extention de nom d'enregistrement du dictionnaire résumant le grid search
-spec_para = "_augm_F1"
+spec_para = "_augm_F1_CM"
 #chemin vers le dossier de sauvegardes:
 path_saved_data = "/net/cremi/mvoiturin/Bureau/projet-deep-learning-m1/ResNext50/saved_model"
 
@@ -51,13 +51,13 @@ path_saved_data = "/net/cremi/mvoiturin/Bureau/projet-deep-learning-m1/ResNext50
 #chemin vers le dossier du modèle sauvegardé :
 fichier = "/net/cremi/mvoiturin/Bureau/projet-deep-learning-m1/ResNext50/saved_model"
 #nom du modèle sauvegardé et indices :
-nom_modele = "modelconfig0_epochs100_cardinality16_learningrate0.001_bwidth3_batch_size32_im_type_RGB_epoch100.pth"
+nom_modele = "modelconfig0_epochs100_cardinality16_learningrate0.0001_bwidth3_batch_size32_im_type_RGB_MS_HS_epoch100.pth"
 ind_cardinality_modele = 16
 ind_bwidth_modele = 3
 
 
 #etapes
-etapes = [1,2,3,4] # de 1 à 3
+etapes = [1,2,3] # de 1 à 3
 #seed de Random
 seed_id = 42
 
@@ -432,11 +432,28 @@ def import_images(class_names, dico, Im_type, tr_or_te="train"):
     
             # Redimensionnement HS 32x32 -> 64x64
             img_hs = resize(img_hs, (64, 64, 125), anti_aliasing=True).astype(np.float32)
+                    
+            if Im_type=="RGB_MS":
+                    # Concaténation RGB + MS
+                img_fusion = np.concatenate([img_rgb, img_ms], axis=2)
+                images.append(img_fusion)
+                labels.append(j)
+            elif Im_type=="RGB_HS":
+                # Concaténation RGB + HS
+                img_fusion = np.concatenate([img_rgb, img_hs], axis=2)
+                images.append(img_fusion)
+                labels.append(j)
+            elif Im_type=="MS_HS":
+                # Concaténation RGB + MS
+                img_fusion = np.concatenate([img_ms,img_hs], axis=2)
+                images.append(img_fusion)
+                labels.append(j)
+            else :
+                # Concaténation RGB + MS + HS -> 133 canaux
+                img_fusion = np.concatenate([img_rgb, img_ms, img_hs], axis=2)
+                images.append(img_fusion)
+                labels.append(j)
     
-            # Concaténation RGB + MS + HS -> 133 canaux
-            img_fusion = np.concatenate([img_rgb, img_ms, img_hs], axis=2)
-            images.append(img_fusion)
-            labels.append(j)
     
         return {"images": np.array(images), "labels": labels}
 
@@ -538,6 +555,7 @@ if 1 in etapes:
     #stockage de résultats
     resultats = {}
     
+    
     if 2 in etapes :
         for i in dico_config :
           print(f"Running config : {i}")
@@ -552,6 +570,12 @@ if 1 in etapes:
             tpr = 5
           elif Im_type == "HS" :
             tpr = 125
+          elif Im_type == "RGB_MS":
+            tpr = 8
+          elif Im_type == "RGB_HS":
+            tpr = 128
+          elif Im_type == "MS_HS":
+            tpr = 130
           else :
             tpr  = 133
         
@@ -662,6 +686,7 @@ if 1 in etapes:
         
           resultats[i]["best_val_acc"] = best_val_acc
           resultats[i]["best_epoch"] = best_epoch
+        
           
           print("Evaluation sur le jeu de test.")
           model.eval()
@@ -677,16 +702,22 @@ if 1 in etapes:
                   all_preds.extend(predicted.cpu().numpy())
                   all_labels.extend(labels.numpy())
 
-          resultats[i]["f1"] = f1_score(all_labels, all_preds, average="macro")
-          print(f"F1-score macro : {resultats[i]['f1']:.4f}")
-
-          resultats[i]["cm"] = confusion_matrix(all_labels, all_preds)
-
-          f1_par_classe = f1_score(all_labels, all_preds, average=None)
-          for k, classe in enumerate(class_names):
-              resultats[i][f"F1-score_{classe}"] = f"{f1_par_classe[k]:.4f}"
-        
+          F1_sco = f1_score(all_labels, all_preds, average=None)
           
+          
+          resultats[i]["f1_macro"] = f1_score(all_labels, all_preds, average="macro")
+          for ind in range(len(class_names)) :
+              resultats[i][f"f1_{class_names[ind]}"] =  F1_sco[ind]
+          
+          cm = confusion_matrix(all_labels, all_preds)
+          resultats[i][f"cm"] = {}
+          
+          for ind in range(len(cm)) :  
+              for indi in range(len(cm[ind])):
+                  resultats[i]["cm"][f"{ind}_{indi}"] = int(cm[ind][indi])
+          
+          resultats[i]["class_names"]=class_names
+            
           if test_acc>seuil :
             #Stocker le modèle à la fin de chaque epoch pour pouvoir comparer les loss entre les hyperparamètres
             
@@ -698,7 +729,16 @@ if 1 in etapes:
               file = f"{path_saved_data}/MS"
             elif Im_type=="HS" :
               os.makedirs(f"{path_saved_data}/HS", exist_ok=True)
-              file = f"{path_saved_data}/concat"
+              file = f"{path_saved_data}/HS"
+            elif Im_type=="RGB_MS" :
+              os.makedirs(f"{path_saved_data}/RGB_MS", exist_ok=True)
+              file = f"{path_saved_data}/RGB_MS"
+            elif Im_type=="RGB_HS" :
+              os.makedirs(f"{path_saved_data}/RGB_HS", exist_ok=True)
+              file = f"{path_saved_data}/RGB_HS"
+            elif Im_type=="MS_HS" :
+              os.makedirs(f"{path_saved_data}/MS_HS", exist_ok=True)
+              file = f"{path_saved_data}/MS_HS"
             else :
               os.makedirs(f"{path_saved_data}/concat", exist_ok=True)
               file = f"{path_saved_data}/concat"
@@ -710,6 +750,7 @@ if 1 in etapes:
                 ind_cardinality_modele = config["cardinality"]
                 ind_bwidth_modele = config["bwidth"]
 
+            
             torch.save(model.state_dict(), model_save_path)
             print(f"Model saved to {model_save_path}")
           print("")
@@ -734,6 +775,12 @@ if 1 in etapes:
               file = f"{path_saved_data}/resultats_MS{spec_para}.json"
             elif Im_type=="HS" :
               file = f"{path_saved_data}/resultats_HS{spec_para}.json"
+            elif Im_type=="RGB_MS" :
+              file = f"{path_saved_data}/resultats_RGB_MS{spec_para}.json"
+            elif Im_type=="RGB_HS" :
+              file = f"{path_saved_data}/resultats_RGB_HS{spec_para}.json"
+            elif Im_type=="MS_HS" :
+              file = f"{path_saved_data}/resultats_MS_HS{spec_para}.json"
             else : 
               file = f"{path_saved_data}/resultats_concat{spec_para}.json"
                 
@@ -753,6 +800,12 @@ if 4 in etapes :
       tpr = 5
     elif Im_type == "HS" :
       tpr = 125
+    elif Im_type == "RGB_MS":
+      tpr = 8
+    elif Im_type == "RGB_HS":
+      tpr = 128
+    elif Im_type == "MS_HS":
+      tpr = 130
     else :
       tpr = 133
     

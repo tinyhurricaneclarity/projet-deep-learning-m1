@@ -6,7 +6,7 @@
 class_names = ["Health","Rust","Other"] # classes présentes
 
 #type d'image :
-Im_type = "HS"                 # "RGB","MS,"HS"
+Im_type = "MS_HS"                 # "RGB","MS,"HS"
 
 #Nombre d'image :
 Num_data = 600           # Nombre d'images dans les datas. Normalement, c'est un multiple du nomùbre de classe ayant un jeu de datas parfaitement équilibré
