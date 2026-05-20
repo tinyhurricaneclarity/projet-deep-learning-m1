@@ -7,7 +7,7 @@ PASS = "mypass"
 
 
 # CHEMINS DES DONNÉES
-# Modifier ces chemins selon votre environnement
+
 paths = {
     "mypass": "/home/mona/Documents/Projet/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train",
     "profpass": "/path/to/data"  # à compléter par la prof

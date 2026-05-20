@@ -2,16 +2,16 @@
 # Fichier de configuration central pour le ConvNet
 # Modifier ce fichier pour adapter le code à votre environnement
 
-# PASS : mot de passe pour identifier l'utilisateur
+# PASS : mot de passe pour identifier l'utilisateur 
 PASS = "mypass"
 
 
 # CHEMINS DES DONNÉES
 # Modifier ces chemins selon votre environnement
 paths = {
-    "mypass": "/home/mona/Documents/Projet/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train",
-    "profpass": "/path/to/data"  # à compléter par la prof
+    "mypass": "projet-deep-learning-m1/data/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train"
 }
+
 
 PATH = paths[PASS]
 
@@ -25,6 +25,7 @@ NUM_CLASSES = len(CLASS_NAMES)
 BATCH_SIZE = 32
 NUM_DATA   = 600  # nombre total d'images (200 par classe × 3 classes)
 NUM_DATA_2CLASSES = 400  # 2 classes × 200
+
 
 # Grid search : valeurs à tester
 GRID_PARAMS = {
@@ -42,3 +43,5 @@ FACTOR_SCHEDULER        = 0.5
 # Seeds pour la reproductibilité
 SEED_RANDOM = 42
 SEED_TORCH  = 42
+
+criterion_config = "CrossEntropy"

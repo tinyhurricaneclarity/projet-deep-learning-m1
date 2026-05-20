@@ -15,6 +15,7 @@ Les images sont prises par un drone : DJI M600 Pro UAV with an S185 snapshot hyp
 # Arborescence
 
 ```
+projet-deep-kearning-m1/
 ├── data/
 │    beyond-visible-spectrum-ai-for-agriculture-2026
 │    ├── Kaggle Prepared/ 
@@ -53,9 +54,12 @@ Les images sont prises par un drone : DJI M600 Pro UAV with an S185 snapshot hyp
 │      
 ├── requirements.txt
 ├── README.md
-└── .gitignore
+├── .gitignore
+├── legacy                      #dossier pour les anciens codes
 ```
 # Matériel 
+
+Ordinateur du deuxième étage du CREMI :
 
 Linux saruman 6.12.74+deb12-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.12.74-2~bpo12+1 (2026-03-13) x86_64 GNU/Linux
 
@@ -77,33 +81,3 @@ Identifiant constructeur :                  GenuineIntel
 2 GPUS
 Principal : NVIDIA GeForce RTX 3060
 Intégré au processeur (iGPU) : Intel UHD Graphics 770
-
-
-# Protocole expérimental
-
-
-base commune pour chaque modèle
-
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-    optimizer, 
-    mode='min',        # réduit quand la val loss ne s'améliore plus
-    factor=0.5,        # divise le learning rate par 2
-    patience=5,        # attend 5 epochs sans amélioration avant de réduire
-)
-
-batch_size    = 32
-num_epochs    = 100
-learning_rate = 0.001
-
-
-
-avec - sans dataaugmentation
-
-
-K fold ?
-Si ton dataset était très petit (< 1000 exemples) et que chaque exemple compte
-Si tu voulais faire du model ensembling (moyenner les prédictions des k modèles)
-Si tu avais un déséquilibre de classes important à gérer
-Pour une compétition Kaggle avec ResNet18, garde ton split actuel. Le K-Fold est une optimisation avancée qui ne vaut le coût que si tu cherches à gratter les derniers points sur le leaderboard

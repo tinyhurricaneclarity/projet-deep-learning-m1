@@ -9,12 +9,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import f1_score
 
-from config import (
+from src.config.config import (
     CLASS_NAMES, BATCH_SIZE, NUM_DATA, NUM_DATA_2CLASSES, GRID_PARAMS,
     PATIENCE_EARLY_STOPPING, PATIENCE_SCHEDULER, FACTOR_SCHEDULER,
     SEED_RANDOM, SEED_TORCH
 )
-from models import convet
+from models.convnet import ConvNet
 from dataset.dataset_load import alea_train_test, sufix_and_path, import_images, get_transforms, create_dataloaders
 
 
