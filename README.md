@@ -1,83 +1,153 @@
-# Table des matières
+# Projet Deep Learning - Détection de la Rouille Jaune
 
-[Projet](#Projet)
-[Arboresence](#arborescence)
+Projet de classification d'images agricoles pour détecter la rouille jaune sur des cultures à l'aide de différentes modalités d'imagerie (RGB, multispectral, hyperspectral).
 
-# Projet
-
-Kaggle competition :
-Beyond Visible Spectrum: AI for Agriculture 2026
-Automated Multimodal Crop Disease Diagnosis from multimodal remote sensing imagery 5th
-
-L'objetif est d'entraîner un modèle sur des images RGB, multispectrales et hyperspectrales provenant d'un champs, pour la reconnaissance de la rouille du blé. 
-Les images sont prises par un drone : DJI M600 Pro UAV with an S185 snapshot hyperspectral sensor (UAV imagery), à 60m de hauteur. Résolution spectrale : 4cm/pixel.
-
-# Arborescence
+## 🏗️ Structure du projet
 
 ```
-projet-deep-kearning-m1/
+projet-deep-learning-m1/
 ├── data/
-│    beyond-visible-spectrum-ai-for-agriculture-2026
-│    ├── Kaggle Prepared/ 
-│        ├──train
-│            ├──HS
-│            ├──MS
-│            ├──RGB
-│        ├──val
-│            ├──HS
-│            ├──MS
-│            ├──RGB  
-│  
+│   └── beyond-visible-spectrum-ai-for-agriculture-2026/
+│       └── Kaggle Prepared/
+│           ├── train/
+│           │   ├── HS/
+│           │   ├── MS/
+│           │   └── RGB/
+│           └── val/
+│               ├── HS/
+│               ├── MS/
+│               └── RGB/
+│
 ├── src/
-│     ├── config/
-│       ├── config.py #hyperparamètres + chemins
+│   ├── config.py           # Configuration et hyperparamètres
+│   ├── models.py           # Tous les modèles (ConvNet, ResNet18, ResNet50, ResNeXt50)
+│   └── dataset/
+│       └── dataset_load.py # Chargement et augmentation des données
 │
-│     ├── dataset/
-│       ├── dataset_load.py #Load, data augmentation
+├── train.py                # Script d'entraînement avec grid search
+├── evaluate.py             # Script d'évaluation et visualisation
+├── main.py                 # Point d'entrée principal
 │
-│     ├── models/
-│       ├── __init__.py
-│       ├── convnet.py
-│       ├── resnet.py
-│       └── resnext.py
+├── results/                # Résultats des entraînements
+│   ├── convnet/
+│   ├── resnet18/
+│   ├── resnet50/
+│   └── resnext50/
 │
-├── train.py                    # Tout-en-un : training + losses + metrics
-├── evaluate.py                 # Évaluation et visualisation
-├── main.py
-│
-│
-│      ├── results/                       # Dossier pour sauvegarder les résultats
-│         ├── convnet/
-│         ├── resnet18/
-│         ├── resnet50/
-│         └── resnext50/
-│      
 ├── requirements.txt
-├── README.md
-├── .gitignore
-├── legacy                      #dossier pour les anciens codes
+└── README.md
 ```
-# Matériel 
 
-Ordinateur du deuxième étage du CREMI :
+## 📦 Installation
 
-Linux saruman 6.12.74+deb12-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.12.74-2~bpo12+1 (2026-03-13) x86_64 GNU/Linux
+```bash
+# Créer un environnement virtuel
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# ou
+venv\Scripts\activate  # Windows
 
-Architecture :                              x86_64
-  Mode(s) opératoire(s) des processeurs :   32-bit, 64-bit
-  Tailles des adresses:                     46 bits physical, 48 bits virtual
-  Boutisme :                                Little Endian
-Processeur(s) :                             24
-  Liste de processeur(s) en ligne :         0-23
-Identifiant constructeur :                  GenuineIntel
-  Nom de modèle :                           12th Gen Intel(R) Core(TM) i9-12900
-    Famille de processeur :                 6
-    Modèle :                                151
-    Thread(s) par cœur :                    2
-    Cœur(s) par socket :                    16
-    Socket(s) :                             1
-    Révision :                              2
+# Installer les dépendances
+pip install -r requirements.txt
+```
 
-2 GPUS
-Principal : NVIDIA GeForce RTX 3060
-Intégré au processeur (iGPU) : Intel UHD Graphics 770
+## 🚀 Usage
+
+### Entraînement d'un modèle
+
+```bash
+# Entraîner ResNet18 sur RGB avec grid search
+python main.py --model resnet18 --modality RGB --mode train
+
+# Entraîner ResNet50 sur RGB+MS+HS sans grid search (plus rapide)
+python main.py --model resnet50 --modality RGB_MS_HS --mode train --no-grid-search
+
+# Entraîner ConvNet sur MS
+python main.py --model convnet --modality MS --mode train
+```
+
+### Évaluation d'un modèle
+
+```bash
+# Évaluer le meilleur modèle ResNet18 RGB
+python main.py --model resnet18 --modality RGB --mode eval
+
+# Évaluer un checkpoint spécifique
+python main.py --model resnet50 --modality HS --mode eval --checkpoint results/resnet50/HS/best_resnet50_HS_model.pth
+```
+
+### Entraînement et évaluation
+
+```bash
+# Tout en une seule commande
+python main.py --model resnet18 --modality RGB_MS --mode both
+```
+
+## 🎯 Modalités disponibles
+
+| Modalité       | Canaux | Taille | Classes | Description                     |
+|----------------|--------|--------|---------|----------------------------------|
+| RGB            | 3      | 64     | 3       | Images RGB classiques            |
+| MS             | 5      | 64     | 3       | Multispectral                    |
+| HS             | 125    | 32     | 3       | Hyperspectral                    |
+| RGB_MS         | 8      | 64     | 3       | RGB + Multispectral              |
+| MS_HS          | 130    | 64     | 3       | Multispectral + Hyperspectral    |
+| RGB_MS_HS      | 133    | 64     | 3       | RGB + MS + HS (toutes modalités) |
+| MS_sans_other  | 5      | 64     | 2       | MS sans classe "Other"           |
+| HS_sans_other  | 125    | 32     | 2       | HS sans classe "Other"           |
+
+## 🧠 Modèles disponibles
+
+- **ConvNet** : Architecture custom from scratch
+- **ResNet18** : ResNet avec 18 couches
+- **ResNet50** : ResNet avec 50 couches (bottleneck blocks)
+- **ResNeXt50** : ResNet avec grouped convolutions
+
+## 📊 Résultats
+
+Les résultats de chaque entraînement sont sauvegardés dans `results/[model]/[modality]/` :
+
+- `grid_search_results_[modality].csv` : Résultats du grid search
+- `best_[model]_[modality]_model.pth` : Meilleur modèle
+- `loss_[model]_[modality].png` : Courbe de loss
+- `accuracy_[model]_[modality].png` : Courbe d'accuracy
+- `confusion_matrix_[model]_[modality].png` : Matrice de confusion (après évaluation)
+
+## ⚙️ Configuration
+
+Les hyperparamètres sont définis dans `src/config.py` :
+
+- Grid search : `GRID_PARAMS`
+- Batch size : `BATCH_SIZE`
+- Early stopping : `PATIENCE_EARLY_STOPPING`
+- Scheduler : `PATIENCE_SCHEDULER`, `FACTOR_SCHEDULER`
+
+## 📝 Classes
+
+Le dataset contient 3 classes :
+- **Health** : Plantes saines
+- **Rust** : Rouille jaune
+- **Other** : Autres maladies/états
+
+Pour les modalités `sans_other`, seules les classes Health et Rust sont utilisées.
+
+## 🔬 Grid Search
+
+Le grid search teste automatiquement différentes combinaisons d'hyperparamètres :
+- Nombre d'epochs : 50, 100
+- Learning rate : 0.001, 0.0001
+- Optimizer : Adam, SGD
+- Scheduler : StepLR, ReduceLROnPlateau
+
+Pour désactiver le grid search et utiliser les paramètres par défaut :
+```bash
+python main.py --model resnet18 --modality RGB --mode train --no-grid-search
+```
+
+## 📄 License
+
+Projet académique M1 - Université de Bordeaux
+
+## 👥 Auteurs
+
+Projet de Deep Learning M1 - Détection de la rouille jaune
