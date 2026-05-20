@@ -60,7 +60,7 @@ train_losses, train_acc_list, val_losses, val_acc_list = [], [], [], []
 
 # Sauvegarde du meilleur modèle
 best_val_acc = 0.0
-best_model_path = "best_resnet18_HS_model.pth"
+best_model_path = "results/best_resnet18_HS_model.pth"
 
 print("Début de l'entraînement...")
 
@@ -191,11 +191,16 @@ print("✓ Courbe d'accuracy sauvegardée dans accuracy_resnet18_HS.png")
 # 3. Matrice de confusion
 plt.figure(figsize=(8, 6))
 sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', 
-            xticklabels=class_names, yticklabels=class_names)
-plt.title(f'Matrice de confusion - Test Set\nAccuracy: {test_accuracy:.2f}%')
-plt.ylabel('Vraie classe')
-plt.xlabel('Classe prédite')
-plt.savefig("results/confusion_matrix_resnet18_HS.png", dpi=150, bbox_inches='tight')
-print("✓ Matrice de confusion sauvegardée dans confusion_matrix_resnet18.png")
+            xticklabels=class_names, yticklabels=class_names,
+            annot_kws={"size": 18})  # Taille des chiffres
+
+plt.title(f'Matrice de confusion Resnet 18 HS - Test Set\nAccuracy: {test_accuracy:.2f}%', 
+          fontsize=18)
+plt.ylabel('Vraie classe', fontsize=16)
+plt.xlabel('Classe prédite', fontsize=16)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+
+plt.savefig("results/confusion_matrix_resnet18_HS_new.png", dpi=150, bbox_inches='tight')
 
 print("\n✓ Toutes les visualisations ont été sauvegardées !")

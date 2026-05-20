@@ -1,9 +1,6 @@
-#Evaluation test set
-
-"""RESNET18 Se placer dans le dossier resnet18 pour lancer le code"""
-"""Fichier éval permet de recreéer le split du dataset utilisé pour l'entraintement du modèle. 
-Les indices de split du dataset sont sauvegardés au cours de l'évaluation et le dataset est resplitté selon les indices dans ce fichier.
-Le modèle testé est le meilleur selon la val loss/acc"""
+"""Evaluation sur test set et matrice de confusion sur meilleure configuration
+Réentraînement avec meilleure configuration
+"""
 
 import model
 import torch
@@ -12,71 +9,193 @@ from torch.utils.data import DataLoader
 from sklearn.metrics import f1_score, confusion_matrix, accuracy_score, recall_score, precision_score
 from config import class_names, batch_size
 import numpy as np
-#ne pas faire from train import car quand Python importe depuis train.py, il exécute tout le fichier train.py — y compris la boucle d'entraînement.
-#sinon ajouter dans train.py if __name__ == "__main__":
+import torch.optim as optim
+import torch.nn as nn
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-#Définition du device et du modèle
+# Définition du device et du modèle
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = model.ResNet50().to(device) #lance une nouvelle instance du modèle, ca réinitialise tout.
+model = model.ResNet18().to(device)
 print(model)
 
-#Chargement du modèle sauvegardé à tester
-model.load_state_dict(torch.load("src/resnet50_RGB/results/saved_models/best_acc_RGB_data_aug_50.pth"))
-
-#Import du test dataset (meme prcoédure que dans train, appliqué sur test)
-
 path_train_rgb = "/net/cremi/leanguye/projet-deep-learning-m1/resnet18/data/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared/train/RGB/"
-
 
 class_names = ["Health", "Rust", "Other"]
 Im_type     = "RGB"
 Num_data    = 600  # 200 images par classe
 
-split = torch.load("src/resnet50_RGB/results/split_par_classe_RGB_data_aug_50.pth") #dictionnaire qui renvoit {"test":(classe, indice), val..., train...}
-test  = data_load.import_images(class_names, split, "test") #renvoie uniquement les tuples de "test"
+# Chargement des données
+split = torch.load("src/resnet18_RGB/results/split_par_classe_data_augmentation.pth")
+
+# Test set
+test = data_load.import_images(class_names, split, "test")
 test_dataset = data_load.CustomImageDataset(test['images'], test['labels'], transform=data_load.eval_transform)
-test_loader  = DataLoader(test_dataset,  batch_size=batch_size, shuffle=False)
+test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
+# Train set
+train = data_load.import_images(class_names, split, "train")
+train_dataset = data_load.CustomImageDataset(train['images'], train['labels'], transform=data_load.train_transform)
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
-print("Evaluation sur le jeu de test\n")
+# Validation set (CORRIGÉ)
+val = data_load.import_images(class_names, split, "val")
+val_dataset = data_load.CustomImageDataset(val['images'], val['labels'], transform=data_load.eval_transform)
+val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
+# Hyperparamètres
+num_epochs = 50
+learning_rate = 0.0001
+optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9)
+criterion = nn.CrossEntropyLoss()
+scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+    optimizer, 
+    mode='min',
+    factor=0.5,
+    patience=5
+)
+
+# Listes pour stocker les résultats
+train_losses, train_acc_list, val_losses, val_acc_list = [], [], [], []
+
+# Sauvegarde du meilleur modèle
+best_val_acc = 0.0
+best_model_path = "results/best_resnet18_RGB_model.pth"
+
+print("Début de l'entraînement...")
+
+for epoch in range(num_epochs):
+    # ===== TRAIN =====
+    model.train()
+    train_running_loss = 0.0
+    correct, total = 0, 0
+    
+    for inputs, labels in train_loader:
+        inputs, labels = inputs.to(device), labels.to(device)
+        optimizer.zero_grad()
+        outputs = model(inputs)
+        loss = criterion(outputs, labels)
+        loss.backward()
+        optimizer.step()
+        
+        train_running_loss += loss.item() * inputs.size(0)
+        _, predicted = outputs.max(1)
+        total += labels.size(0)
+        correct += predicted.eq(labels).sum().item()
+    
+    train_loss = train_running_loss / len(train_loader.dataset)
+    train_acc = 100. * correct / total
+    train_losses.append(train_loss)
+    train_acc_list.append(train_acc)
+
+    # ===== VALIDATION =====
+    model.eval()
+    correct, total = 0, 0
+    val_running_loss = 0
+    
+    with torch.no_grad():
+        for inputs, labels in val_loader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            
+            val_running_loss += loss.item() * inputs.size(0)
+            _, predicted = outputs.max(1)
+            total += labels.size(0)
+            correct += predicted.eq(labels).sum().item()
+    
+    val_loss = val_running_loss / len(val_loader.dataset)
+    val_acc = 100. * correct / total
+    val_losses.append(val_loss)
+    val_acc_list.append(val_acc)
+    
+    scheduler.step(val_loss)
+    
+    # Sauvegarde du meilleur modèle
+    if val_acc > best_val_acc:
+        best_val_acc = val_acc
+        torch.save(model.state_dict(), best_model_path)
+        print(f"✓ Meilleur modèle sauvegardé (epoch {epoch+1}, val_acc={val_acc:.2f}%)")
+    
+    # Affichage toutes les 5 epochs
+    if (epoch + 1) % 5 == 0:
+        print(f"Epoch [{epoch+1}/{num_epochs}] - "
+              f"Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.2f}% | "
+              f"Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.2f}%")
+
+print("\n" + "="*60)
+print("Entraînement terminé !")
+print(f"Meilleure validation accuracy : {best_val_acc:.2f}%")
+print("="*60 + "\n")
+
+# ===== ÉVALUATION FINALE SUR TEST SET =====
+print("Chargement du meilleur modèle pour évaluation finale...")
+model.load_state_dict(torch.load(best_model_path))
 model.eval()
-all_preds  = []
+
+all_preds = []
 all_labels = []
 
 with torch.no_grad():
     for images, labels in test_loader:
-        images       = images.to(device)
-        labels       = labels.squeeze() #nettoyage
-        outputs      = model(images) #prédiction par le modèle sur les images du test set. sortie : [batch_size, nb_classes]. ex : [32, 3] → 3 classes
-        _, predicted = torch.max(outputs, 1) #torch.max(input, dim). Dans la dimension 1 de outputs (donc les classes), on prend la classe avec la plus grande probabilité (torch.max retourne deux valeurs : (max_value, max_index))
-        all_preds.extend(predicted.cpu().numpy()) #stockage des prédictions sous forme numpy. .extend permet d'ajouter plusieurs éléments à une liste
-        all_labels.extend(labels.numpy()) #stockage des vrais labels
+        images = images.to(device)
+        labels = labels.squeeze()
+        outputs = model(images)
+        _, predicted = torch.max(outputs, 1)
+        all_preds.extend(predicted.cpu().numpy())
+        all_labels.extend(labels.numpy())
+
+# Calcul des métriques
+test_accuracy = accuracy_score(all_labels, all_preds) * 100
+test_f1 = f1_score(all_labels, all_preds, average='weighted')
+test_precision = precision_score(all_labels, all_preds, average='weighted')
+test_recall = recall_score(all_labels, all_preds, average='weighted')
+conf_matrix = confusion_matrix(all_labels, all_preds)
+
+print("\n" + "="*60)
+print("RÉSULTATS SUR TEST SET")
+print("="*60)
+print(f"Accuracy  : {test_accuracy:.2f}%")
+print(f"F1-Score  : {test_f1:.4f}")
+print(f"Precision : {test_precision:.4f}")
+print(f"Recall    : {test_recall:.4f}")
+print("="*60 + "\n")
+
+# ===== VISUALISATIONS =====
+
+# 1. Courbes de loss
+epochs = range(1, num_epochs + 1)
+plt.figure(figsize=(10, 4))
+plt.plot(epochs, train_losses, label='Train Loss', marker='o', markersize=3)
+plt.plot(epochs, val_losses, label='Val Loss', marker='o', markersize=3)
+plt.xlabel("Epoch")
+plt.ylabel("Loss")
+plt.title("Courbe de loss - ResNet18 RGB")
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.savefig("results/loss_resnet18_RGB.png", dpi=150, bbox_inches='tight')
 
 
-
-# Accuracy, recall, precision
-
-metrics = {
-    "Accuracy": accuracy_score,
-    "Precision": lambda y, p: precision_score(y, p, average="macro"),
-    "Recall": lambda y, p: recall_score(y, p, average="macro"), 
-    "F1-score macro": lambda y, p: f1_score(y, p, average="macro") 
-}
-
-for name, function in metrics.items():
-    score = function(all_labels, all_preds)
-    print(f"{name} : {score:.4f}%")
+# 2. Courbes d'accuracy
+plt.figure(figsize=(10, 4))
+plt.plot(epochs, train_acc_list, label='Train Accuracy', marker='o', markersize=3)
+plt.plot(epochs, val_acc_list, label='Val Accuracy', marker='o', markersize=3)
+plt.xlabel("Epoch")
+plt.ylabel("Accuracy (%)")
+plt.title("Courbe d'accuracy - ResNet18RGB")
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.savefig("results/accuracy_resnet18_RGB.png", dpi=150, bbox_inches='tight')
 
 
-# F1-score par classe
-f1_par_classe = f1_score(all_labels, all_preds, average=None)
-for i, classe in enumerate(class_names):
-    print(f"F1-score {classe} : {f1_par_classe[i]:.4f}")
+# 3. Matrice de confusion
+plt.figure(figsize=(8, 6))
+sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', 
+            xticklabels=class_names, yticklabels=class_names)
+plt.title(f'Matrice de confusion Resnet 18 RGB- Test Set\nAccuracy: {test_accuracy:.2f}%')
+plt.ylabel('Vraie classe')
+plt.xlabel('Classe prédite')
+plt.savefig("results/confusion_matrix_resnet18_RGB.png", dpi=150, bbox_inches='tight')
 
-# Matrice de confusion
-cm = confusion_matrix(all_labels, all_preds)
-print("Matrice de confusion :")
-print(cm)
 
-
+print("\n✓ Toutes les visualisations ont été sauvegardées !")
