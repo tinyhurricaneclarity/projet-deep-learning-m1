@@ -6,6 +6,7 @@ Projet de classification d'images agricoles pour détecter la rouille jaune sur 
 
 ```
 projet-deep-learning-m1/
+├── legacy #ancien code non unifié
 ├── data/
 │   └── beyond-visible-spectrum-ai-for-agriculture-2026/
 │       └── Kaggle Prepared/
@@ -18,24 +19,29 @@ projet-deep-learning-m1/
 │               ├── MS/
 │               └── RGB/
 │
-├── src/
-│   ├── config.py           # Configuration et hyperparamètres
-│   ├── models.py           # Tous les modèles (ConvNet, ResNet18, ResNet50, ResNeXt50)
-│   └── dataset/
-│       └── dataset_load.py # Chargement et augmentation des données
-│
-├── train.py                # Script d'entraînement avec grid search
-├── evaluate.py             # Script d'évaluation et visualisation
-├── main.py                 # Point d'entrée principal
-│
-├── results/                # Résultats des entraînements
-│   ├── convnet/
-│   ├── resnet18/
-│   ├── resnet50/
-│   └── resnext50/
-│
-├── requirements.txt
-└── README.md
+└── src
+    ├── config
+    │   ├── config.py       #hyperparamètres 
+    │   └── __init__.py
+    ├── dataset
+    │   ├── dataset_load.py #chargement des données et transformations
+    │   └── __init__.py
+    ├── eval
+    │   ├── evaluate.py 
+    │   └── __init__.py
+    ├── main.py             #appelle les fichiers nécéssaires pour faire tourner le modèle         
+    ├── models
+    │   ├── __init__.py
+    │   └── models.py       #un fichier contenant tous les modèles : Convnet, Resnet18, Resnet50 et ResneXt50
+    ├── requirements.txt
+    ├── results
+    │   ├── convnet/
+    │   ├── resnet18/
+    │   ├── resnet50/
+    │   └── resnext50/
+    └── train
+        └── train.py 
+
 ```
 
 ##  Installation
