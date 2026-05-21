@@ -2,7 +2,7 @@
 
 Projet de classification d'images agricoles pour détecter la rouille jaune sur des cultures à l'aide de différentes modalités d'imagerie (RGB, multispectral, hyperspectral).
 
-## 🏗️ Structure du projet
+##  Structure du projet
 
 ```
 projet-deep-learning-m1/
@@ -38,7 +38,7 @@ projet-deep-learning-m1/
 └── README.md
 ```
 
-## 📦 Installation
+##  Installation
 
 ```bash
 # Créer un environnement virtuel
@@ -51,7 +51,7 @@ venv\Scripts\activate  # Windows
 pip install -r requirements.txt
 ```
 
-## 🚀 Usage
+##  Usage
 
 ### Entraînement d'un modèle
 
@@ -83,7 +83,7 @@ python main.py --model resnet50 --modality HS --mode eval --checkpoint results/r
 python main.py --model resnet18 --modality RGB_MS --mode both
 ```
 
-## 🎯 Modalités disponibles
+##  Modalités disponibles
 
 | Modalité       | Canaux | Taille | Classes | Description                     |
 |----------------|--------|--------|---------|----------------------------------|
@@ -96,14 +96,14 @@ python main.py --model resnet18 --modality RGB_MS --mode both
 | MS_sans_other  | 5      | 64     | 2       | MS sans classe "Other"           |
 | HS_sans_other  | 125    | 32     | 2       | HS sans classe "Other"           |
 
-## 🧠 Modèles disponibles
+##  Modèles disponibles
 
 - **ConvNet** : Architecture custom from scratch
 - **ResNet18** : ResNet avec 18 couches
 - **ResNet50** : ResNet avec 50 couches (bottleneck blocks)
 - **ResNeXt50** : ResNet avec grouped convolutions
 
-## 📊 Résultats
+##  Résultats
 
 Les résultats de chaque entraînement sont sauvegardés dans `results/[model]/[modality]/` :
 
@@ -113,7 +113,7 @@ Les résultats de chaque entraînement sont sauvegardés dans `results/[model]/[
 - `accuracy_[model]_[modality].png` : Courbe d'accuracy
 - `confusion_matrix_[model]_[modality].png` : Matrice de confusion (après évaluation)
 
-## ⚙️ Configuration
+##  Configuration
 
 Les hyperparamètres sont définis dans `src/config.py` :
 
@@ -122,7 +122,7 @@ Les hyperparamètres sont définis dans `src/config.py` :
 - Early stopping : `PATIENCE_EARLY_STOPPING`
 - Scheduler : `PATIENCE_SCHEDULER`, `FACTOR_SCHEDULER`
 
-## 📝 Classes
+##  Classes
 
 Le dataset contient 3 classes :
 - **Health** : Plantes saines
@@ -131,7 +131,7 @@ Le dataset contient 3 classes :
 
 Pour les modalités `sans_other`, seules les classes Health et Rust sont utilisées.
 
-## 🔬 Grid Search
+##  Grid Search
 
 Le grid search teste automatiquement différentes combinaisons d'hyperparamètres :
 - Nombre d'epochs : 50, 100
@@ -144,10 +144,3 @@ Pour désactiver le grid search et utiliser les paramètres par défaut :
 python main.py --model resnet18 --modality RGB --mode train --no-grid-search
 ```
 
-## 📄 License
-
-Projet académique M1 - Université de Bordeaux
-
-## 👥 Auteurs
-
-Projet de Deep Learning M1 - Détection de la rouille jaune

@@ -1,6 +1,8 @@
-# data_load.py
-# Chargement et préparation des données 
-# Adapté à toutes les modalités : RGB, MS, HS et fusions des modalités
+# src/dataset/dataset_load.py
+"""
+Chargement et préparation des données.
+Adapté à toutes les modalités : RGB, MS, HS et fusions des modalités.
+"""
 
 import numpy as np
 import skimage as ski
@@ -8,7 +10,7 @@ import random
 import torch
 from torch.utils.data import Dataset, DataLoader
 import torchvision.transforms as transforms
-from src.config.config import (SEED_RANDOM, SEED_TORCH, CLASS_NAMES, BATCH_SIZE)
+from src.config import SEED_RANDOM, SEED_TORCH, CLASS_NAMES, BATCH_SIZE
 
 
 ### SEEDS
@@ -31,7 +33,14 @@ def pourcent_to_prop(pourcent):
 def alea_train_test(Num_data, class_names, n_val=99, n_test=99):
     """
     Split aléatoire PAR CLASSE pour garantir l'équilibre entre les classes.
-    402 train / 99 val / 99 test (33 par classe).
+    
+    Paramètres :
+    - Num_data : nombre total d'images (ex: 600 pour 200 par classe)
+    - class_names : liste des noms de classes
+    - n_val : nombre total d'images pour validation (réparti équitablement)
+    - n_test : nombre total d'images pour test (réparti équitablement)
+    
+    Retour : dictionnaire {"train": [...], "val": [...], "test": [...]}
     """
     n_per_class      = int(Num_data / len(class_names))
     n_val_per_class  = int(n_val / len(class_names))
@@ -56,7 +65,14 @@ def alea_train_test(Num_data, class_names, n_val=99, n_test=99):
 
 
 def sufix_and_path(Im_type, dico, path):
-    """Ajoute le suffixe et le chemin selon le type d'image."""
+    """
+    Ajoute le suffixe et le chemin selon le type d'image.
+    
+    Paramètres :
+    - Im_type : type de modalité ('RGB', 'MS', 'HS', 'RGB_MS', etc.)
+    - dico : dictionnaire contenant les indices de split
+    - path : chemin racine vers les données
+    """
     dico["path_data_root"] = path  # toujours défini
     dico["fusion"] = None          # par défaut pas de fusion
 
@@ -72,24 +88,49 @@ def sufix_and_path(Im_type, dico, path):
     elif Im_type in ("RGB_MS", "MS_HS", "RGB_MS_HS"):
         dico["fusion"] = Im_type
     else:
-        print("Forme inconnue")
-
+        print(f"Modalité inconnue : {Im_type}")
 
 
 def load_single_image(path, is_hs=False):
+    """
+    Charge une seule image et la normalise entre 0 et 1.
+    
+    Paramètres :
+    - path : chemin vers l'image
+    - is_hs : si True, assure que l'image HS a exactement 125 canaux
+    
+    Retour : array numpy (H, W, C) normalisé
+    """
     img = ski.io.imread(path).astype(np.float32)
+    
+    # Normalisation entre 0 et 1
     if img.max() > 1.0:
         img = (img - img.min()) / (img.max() - img.min() + 1e-6)
+    
+    # Traitement spécifique pour HS (assurer 125 canaux)
     if is_hs and len(img.shape) == 3:
         if img.shape[2] < 125:
+            # Padding si moins de 125 canaux
             pad = np.zeros((img.shape[0], img.shape[1], 125 - img.shape[2]), dtype=np.float32)
             img = np.concatenate([img, pad], axis=2)
         elif img.shape[2] > 125:
+            # Troncature si plus de 125 canaux
             img = img[:, :, :125]
+    
     return img
 
 
 def import_images(class_names, dico, tr_or_te="train"):
+    """
+    Importe les images selon la modalité (simple ou fusion).
+    
+    Paramètres :
+    - class_names : liste des noms de classes
+    - dico : dictionnaire contenant les chemins et indices
+    - tr_or_te : 'train', 'val' ou 'test'
+    
+    Retour : dictionnaire {"images": np.array, "labels": list}
+    """
     images  = []
     labels  = []
     indices = dico[tr_or_te]
@@ -104,28 +145,33 @@ def import_images(class_names, dico, tr_or_te="train"):
             img = load_single_image(tpr_path, is_hs=is_hs)
 
         elif fusion == "RGB_MS":
+            # Fusion RGB + MS
             rgb = load_single_image(f"{path}/RGB/{class_names[j]}_hyper_{i}.png")
             ms  = load_single_image(f"{path}/MS/{class_names[j]}_hyper_{i}.tif")
-            img = np.concatenate([rgb, ms], axis=2)  # (64,64,8)
+            img = np.concatenate([rgb, ms], axis=2)  # (64, 64, 8)
 
         elif fusion == "MS_HS":
+            # Fusion MS + HS
             ms = load_single_image(f"{path}/MS/{class_names[j]}_hyper_{i}.tif")
             hs = load_single_image(f"{path}/HS/{class_names[j]}_hyper_{i}.tif", is_hs=True)
+            # Resize HS de 32x32 à 64x64
             hs_resized = np.stack([
                 ski.transform.resize(hs[:,:,k], (64,64), anti_aliasing=True)
                 for k in range(hs.shape[2])
             ], axis=2).astype(np.float32)
-            img = np.concatenate([ms, hs_resized], axis=2)  # (64,64,130)
+            img = np.concatenate([ms, hs_resized], axis=2)  # (64, 64, 130)
 
         elif fusion == "RGB_MS_HS":
+            # Fusion RGB + MS + HS
             rgb = load_single_image(f"{path}/RGB/{class_names[j]}_hyper_{i}.png")
             ms  = load_single_image(f"{path}/MS/{class_names[j]}_hyper_{i}.tif")
             hs  = load_single_image(f"{path}/HS/{class_names[j]}_hyper_{i}.tif", is_hs=True)
+            # Resize HS de 32x32 à 64x64
             hs_resized = np.stack([
                 ski.transform.resize(hs[:,:,k], (64,64), anti_aliasing=True)
                 for k in range(hs.shape[2])
             ], axis=2).astype(np.float32)
-            img = np.concatenate([rgb, ms, hs_resized], axis=2)  # (64,64,133)
+            img = np.concatenate([rgb, ms, hs_resized], axis=2)  # (64, 64, 133)
 
         images.append(img)
         labels.append(j)
@@ -133,21 +179,26 @@ def import_images(class_names, dico, tr_or_te="train"):
     return {"images": np.array(images), "labels": labels}
 
 
-
-
-
 ### TRANSFORMATIONS
 
 def get_transforms(in_channels):
     """
-    Retourne les transformations selon le nombre de canaux.
+    Retourne les transformations pour train et eval selon le nombre de canaux.
+    
     RGB : normalisation ImageNet
     MS/HS : normalisation 0.5
+    
+    Paramètres :
+    - in_channels : nombre de canaux d'entrée
+    
+    Retour : (train_transform, eval_transform)
     """
     if in_channels == 3:
+        # Normalisation ImageNet pour RGB
         mean = [0.485, 0.456, 0.406]
         std  = [0.229, 0.224, 0.225]
     else:
+        # Normalisation générique pour MS/HS
         mean = [0.5] * in_channels
         std  = [0.5] * in_channels
 
@@ -171,7 +222,14 @@ def get_transforms(in_channels):
 
 class CustomImageDataset(Dataset):
     """Dataset PyTorch pour nos images."""
+    
     def __init__(self, images, labels, transform=None):
+        """
+        Paramètres :
+        - images : numpy array de shape (N, H, W, C)
+        - labels : liste de labels
+        - transform : transformations à appliquer
+        """
         self.images    = images
         self.labels    = labels
         self.transform = transform
@@ -182,22 +240,37 @@ class CustomImageDataset(Dataset):
     def __getitem__(self, idx):
         image = self.images[idx]
         label = self.labels[idx]
+        
         if self.transform:
             image = self.transform(image)
+        
         label = torch.tensor(label, dtype=torch.long)
         return image, label
 
 
 ### CRÉATION DES DATALOADERS
 
-def create_dataloaders(Train, Val, Test, train_transform, eval_transform):
-    """Crée les DataLoaders pour train, val et test."""
+def create_dataloaders(Train, Val, Test, train_transform, eval_transform, batch_size=None):
+    """
+    Crée les DataLoaders pour train, val et test.
+    
+    Paramètres :
+    - Train, Val, Test : dictionnaires {"images": array, "labels": list}
+    - train_transform : transformations pour train
+    - eval_transform : transformations pour val/test
+    - batch_size : taille du batch (None = utilise BATCH_SIZE de config)
+    
+    Retour : (train_loader, val_loader, test_loader)
+    """
+    if batch_size is None:
+        batch_size = BATCH_SIZE
+    
     train_dataset = CustomImageDataset(Train['images'], Train['labels'], transform=train_transform)
     val_dataset   = CustomImageDataset(Val['images'],   Val['labels'],   transform=eval_transform)
     test_dataset  = CustomImageDataset(Test['images'],  Test['labels'],  transform=eval_transform)
 
-    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-    val_loader   = DataLoader(val_dataset,   batch_size=BATCH_SIZE, shuffle=False)
-    test_loader  = DataLoader(test_dataset,  batch_size=BATCH_SIZE, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
+    val_loader   = DataLoader(val_dataset,   batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True)
+    test_loader  = DataLoader(test_dataset,  batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True)
 
     return train_loader, val_loader, test_loader

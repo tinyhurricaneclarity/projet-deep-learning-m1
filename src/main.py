@@ -1,97 +1,134 @@
-from models.convnet import ConvNet
-from models.resnet18 import ResNet18
-from models.resnet50 import ResNet50
-from models.resnext50 import ResNeXt50
+# main.py
+"""
+Point d'entrée principal du projet de détection de rouille jaune
+"""
 
 import argparse
-from config.config import PATH, CLASS_NAMES
-from train.train_convnet import train
-from eval import evaluate
+import torch
+from src.config import PATH, MODALITES, get_save_dir, get_class_names
+from train import train
+# from evaluate import evaluate  # À décommenter quand evaluate.py sera créé
 
-MODELS = {
-    "convnet": ConvNet,
-    "resnet18": ResNet18,
-    "resnet50": ResNet50,
-    "resnext50": ResNeXt50,
-}
-
-MODALITES = {
-    "RGB":           (3,   64, 3),
-    "MS":            (5,   64, 3),
-    "HS":            (125, 32, 3),
-    "RGB_MS":        (8,   64, 3),
-    "MS_HS":         (130, 64, 3),
-    "RGB_MS_HS":     (133, 64, 3),
-    "MS_sans_other": (5,   64, 2),
-    "HS_sans_other": (125, 32, 2),
-}
 
 def main():
-    parser = argparse.ArgumentParser(description="Détection rouille jaune")
+    parser = argparse.ArgumentParser(
+        description="Détection de la rouille jaune sur images agricoles"
+    )
+    
+    # Arguments principaux
     parser.add_argument(
-        "--modalite",
+        "--model",
+        type=str,
+        required=True,
+        choices=["convnet", "resnet18", "resnet50", "resnext50"],
+        help="Modèle à utiliser"
+    )
+    
+    parser.add_argument(
+        "--modality",
         type=str,
         required=True,
         choices=list(MODALITES.keys()),
         help="Modalité d'imagerie à utiliser"
     )
-
+    
     parser.add_argument(
-    "--model",
-    type=str,
-    required=True,
-    choices=list(MODELS.keys()),
-    help="Modèle à utiliser"
+        "--mode",
+        type=str,
+        default="train",
+        choices=["train", "eval", "both"],
+        help="Mode : train, eval, ou both"
     )
-
+    
+    # Options d'entraînement
+    parser.add_argument(
+        "--no-grid-search",
+        action="store_true",
+        help="Désactiver le grid search et utiliser les paramètres par défaut"
+    )
+    
+    parser.add_argument(
+        "--data-path",
+        type=str,
+        default=PATH,
+        help="Chemin vers les données d'entraînement"
+    )
+    
+    # Options d'évaluation
+    parser.add_argument(
+        "--checkpoint",
+        type=str,
+        default=None,
+        help="Chemin vers le checkpoint pour l'évaluation"
+    )
+    
     args = parser.parse_args()
-    model_name = args.model
-    Im_type = args.modalite
-
-    in_channels, input_size, num_classes = MODALITES[Im_type]
-
-    model_class = MODELS[model_name]
-    model = model_class(
-    in_channels=in_channels,
-    num_classes=num_classes
-    )
-
-    # Adapter CLASS_NAMES selon num_classes
-    class_names = ["Health", "Rust"] if num_classes == 2 else CLASS_NAMES
-
-    save_dir = f"saved_models/{model_name}/{Im_type}"
-
+    
+    # Récupération des paramètres de la modalité
+    modality_config = MODALITES[args.modality]
+    num_classes = modality_config["num_classes"]
+    class_names = get_class_names(num_classes)
+    
+    save_dir = get_save_dir(args.model, args.modality)
+    
     print(f"\n{'='*60}")
-    print(f"Modalité : {Im_type}")
-    print(f"Canaux : {in_channels} | Taille : {input_size}x{input_size} | Classes : {num_classes}")
+    print(f"Modèle    : {args.model}")
+    print(f"Modalité  : {args.modality}")
+    print(f"Canaux    : {modality_config['in_channels']}")
+    print(f"Taille    : {modality_config['input_size']}x{modality_config['input_size']}")
+    print(f"Classes   : {num_classes} {class_names}")
+    print(f"Save dir  : {save_dir}")
     print(f"{'='*60}\n")
-
-    print(">>> Lancement de l'entraînement.")
-    results = train(
-        model=model,
-        Im_type=Im_type,
-        path=PATH,
-        in_channels=in_channels,
-        input_size=input_size,
-        num_classes=num_classes,
-        class_names=class_names,
-        save_dir=save_dir
-    )
-
-    print("\n>>> Lancement de l'évaluation.")
-    metrics, f1_par_classe, cm = evaluate(
-        model=model,
-        Im_type=Im_type,
-        in_channels=in_channels,
-        input_size=input_size,
-        num_classes=num_classes,
-        class_names=class_names,
-        save_dir=save_dir
-    )
-
+    
+    # MODE TRAIN
+    if args.mode in ["train", "both"]:
+        print(">>> Lancement de l'entraînement.")
+        results = train(
+            model_name=args.model,
+            Im_type=args.modality,
+            path=args.data_path,
+            num_classes=num_classes,
+            class_names=class_names,
+            save_dir=save_dir,
+            use_grid_search=not args.no_grid_search
+        )
+        print(f"\nEntraînement terminé. Résultats dans {save_dir}/")
+    
+    # MODE EVAL
+    if args.mode in ["eval", "both"]:
+        print("\n>>> Lancement de l'évaluation.")
+        
+        # Déterminer le checkpoint à utiliser
+        if args.checkpoint:
+            checkpoint_path = args.checkpoint
+        else:
+            checkpoint_path = f"{save_dir}/best_{args.model}_{args.modality}_model.pth"
+        
+        print(f"Checkpoint : {checkpoint_path}")
+        
+        # Vérifier que le checkpoint existe
+        import os
+        if not os.path.exists(checkpoint_path):
+            print(f"ERREUR : Le checkpoint {checkpoint_path} n'existe pas.")
+            print("Lancez d'abord l'entraînement ou spécifiez un checkpoint avec --checkpoint")
+            return
+        
+        # TODO: Décommenter quand evaluate.py sera créé
+        # metrics, f1_par_classe, cm = evaluate(
+        #     model_name=args.model,
+        #     Im_type=args.modality,
+        #     checkpoint_path=checkpoint_path,
+        #     num_classes=num_classes,
+        #     class_names=class_names,
+        #     save_dir=save_dir
+        # )
+        
+        print("Évaluation terminée.")
+    
     print(f"\n{'='*60}")
-    print(f"Terminé. Résultats sauvegardés dans {save_dir}/")
+    print(f"✓ Terminé. Résultats dans {save_dir}/")
     print(f"{'='*60}")
+
 
 if __name__ == "__main__":
     main()

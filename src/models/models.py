@@ -97,7 +97,6 @@ class BasicBlock(nn.Module):
 
 
 class ResNet18(nn.Module):
-    """ResNet18 adapté pour le dataset agricole"""
     def __init__(self, in_channels=3, num_classes=3):
         super().__init__()
         self.in_channels = 64
@@ -182,7 +181,6 @@ class BottleneckBlock(nn.Module):
 
 
 class ResNet50(nn.Module):
-    """ResNet50 adapté pour le dataset agricole"""
     def __init__(self, in_channels=3, num_classes=3):
         super().__init__()
         self.in_channels = 64
@@ -274,7 +272,6 @@ class ResNeXtBlock(nn.Module):
 
 
 class ResNeXt50(nn.Module):
-    """ResNeXt50 adapté pour le dataset agricole"""
     def __init__(self, in_channels=3, num_classes=3, cardinality=32, bwidth=4):
         super(ResNeXt50, self).__init__()
         self.in_channels = 64
