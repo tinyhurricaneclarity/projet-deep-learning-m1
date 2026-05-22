@@ -7,7 +7,7 @@ import argparse
 import torch
 from src.config.config import PATH, MODALITES, get_save_dir, get_class_names
 from src.train.train import train
-from src.eval.eval import evaluate
+from src.eval.evaluate import evaluate
 
 
 def main():
