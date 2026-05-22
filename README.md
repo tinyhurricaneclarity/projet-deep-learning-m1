@@ -6,8 +6,8 @@ Projet de classification d'images agricoles pour détecter la rouille jaune sur 
 
 ```
 projet-deep-learning-m1/
-├── legacy #ancien code non unifié
-├── data/
+├── legacy            #ancien code non unifié
+├── data/             #Non envoyé sur github
 │   └── beyond-visible-spectrum-ai-for-agriculture-2026/
 │       └── Kaggle Prepared/
 │           ├── train/
