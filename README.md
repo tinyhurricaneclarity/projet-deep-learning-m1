@@ -61,7 +61,10 @@ pip install -r requirements.txt
 
 ### Mise à jour des PATHS
 ```
-Pour chager les images, dans config.py mettre le chemin vers le dossier local à_compléter/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle Prepared/train/
+Pour chager les images, dans config.py
+DATA_ROOT = PROJECT_ROOT / "data" / "beyond-visible-spectrum-ai-for-agriculture-2026" / "Kaggle_Prepared"
+
+-> Mettre le chemin vers le dossier local à_compléter/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle Prepared/train/
 
 ```
 
