@@ -4,6 +4,7 @@ Script d'entraînement unifié avec grid search pour tous les modèles
 """
 
 import os
+import seaborn as sns
 import time
 import itertools
 import random
@@ -12,14 +13,14 @@ import torch.nn as nn
 import torch.optim as optim
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.metrics import f1_score, accuracy_score
+from sklearn.metrics import f1_score, accuracy_score, confusion_matrix
 
-from src.config import (
+from src.config.config import (
     CLASS_NAMES, BATCH_SIZE, NUM_DATA, NUM_DATA_2CLASSES, GRID_PARAMS,
     PATIENCE_EARLY_STOPPING, PATIENCE_SCHEDULER, FACTOR_SCHEDULER,
     SEED_RANDOM, SEED_TORCH, get_save_dir, get_class_names
 )
-from src.models import get_model, get_input_channels, get_input_size
+from src.models.models import get_model, get_input_channels, get_input_size
 from src.dataset.dataset_load import (
     alea_train_test, sufix_and_path, import_images, 
     get_transforms, create_dataloaders
@@ -263,6 +264,8 @@ def train(model_name, Im_type, path, num_classes=None, class_names=None,
             torch.save(model.state_dict(), f"{save_dir}/best_{model_name}_{Im_type}_model.pth")
             print(f"  -> Meilleur modèle global sauvegardé (F1: {f1_macro:.4f})")
 
+        cm = confusion_matrix(all_labels, all_preds)
+
         # Enregistrement des résultats
         result_entry = {
             "config":        config_str,
@@ -277,6 +280,7 @@ def train(model_name, Im_type, path, num_classes=None, class_names=None,
             "test_accuracy": test_accuracy,
             "f1_Health":     f1_par_classe[0],
             "f1_Rust":       f1_par_classe[1],
+            "cm":            cm
         }
         if num_classes == 3:
             result_entry["f1_Other"] = f1_par_classe[2]
@@ -303,8 +307,17 @@ def train(model_name, Im_type, path, num_classes=None, class_names=None,
         plt.xlabel("Epoch")
         plt.ylabel("Accuracy")
         plt.title(f"Accuracy - {model_name} {Im_type} ({best_config_str})")
-        plt.legend()
         plt.savefig(f"{save_dir}/accuracy_{model_name}_{Im_type}.png", dpi=150, bbox_inches='tight')
+        plt.legend()
+        plt.close()    
+        
+        plt.figure(figsize=(10, 4))
+        plt.figure(figsize=(8, 8))
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Greens')
+        plt.title('Confusion Matrix')
+        plt.ylabel('True label')
+        plt.xlabel('Predicted label')
+        plt.savefig(f"{save_dir}/confusion_matrix_{model_name}_{Im_type}.png", dpi=150, bbox_inches='tight')
         plt.close()
 
         print(f"\nCourbes sauvegardées dans {save_dir}/")

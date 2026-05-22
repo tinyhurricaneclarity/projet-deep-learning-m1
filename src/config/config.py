@@ -10,8 +10,8 @@ from pathlib import Path
 # CHEMINS
 # ============================================================================
 
-PROJECT_ROOT = Path(__file__).parent.parent
-DATA_ROOT = PROJECT_ROOT / "data" / "beyond-visible-spectrum-ai-for-agriculture-2026" / "Kaggle Prepared"
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+DATA_ROOT = PROJECT_ROOT / "data" / "beyond-visible-spectrum-ai-for-agriculture-2026" / "Kaggle_Prepared"
 RESULTS_ROOT = PROJECT_ROOT / "results"
 CHECKPOINTS_ROOT = PROJECT_ROOT / "checkpoints"
 

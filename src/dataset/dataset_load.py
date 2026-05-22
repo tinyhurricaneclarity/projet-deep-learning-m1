@@ -10,7 +10,7 @@ import random
 import torch
 from torch.utils.data import Dataset, DataLoader
 import torchvision.transforms as transforms
-from src.config import SEED_RANDOM, SEED_TORCH, CLASS_NAMES, BATCH_SIZE
+from src.config.config import SEED_RANDOM, SEED_TORCH, CLASS_NAMES, BATCH_SIZE
 
 
 ### SEEDS
