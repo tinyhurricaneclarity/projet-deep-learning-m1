@@ -7,7 +7,7 @@ import argparse
 import torch
 from src.config.config import PATH, MODALITES, get_save_dir, get_class_names
 from src.train.train import train
-# from evaluate import evaluate  # À décommenter quand evaluate.py sera créé
+from src.eval.eval import evaluate
 
 
 def main():
@@ -113,15 +113,15 @@ def main():
             print("Lancez d'abord l'entraînement ou spécifiez un checkpoint avec --checkpoint")
             return
         
-        # TODO: Décommenter quand evaluate.py sera créé
-        # metrics, f1_par_classe, cm = evaluate(
-        #     model_name=args.model,
-        #     Im_type=args.modality,
-        #     checkpoint_path=checkpoint_path,
-        #     num_classes=num_classes,
-        #     class_names=class_names,
-        #     save_dir=save_dir
-        # )
+        
+        metrics, f1_par_classe, cm = evaluate(
+            model_name=args.model,
+            Im_type=args.modality,
+            checkpoint_path=checkpoint_path,
+            num_classes=num_classes,
+            class_names=class_names,
+            save_dir=save_dir
+        )
         
         print("Évaluation terminée.")
     
