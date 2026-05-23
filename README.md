@@ -6,41 +6,35 @@ Projet de classification d'images agricoles pour détecter la rouille jaune sur 
 
 ```
 projet-deep-learning-m1/
-├── legacy #ancien code non unifié
+├── main.py             # point d'entrée principal
+├── legacy/             # ancien code non unifié
 ├── data/
-│   └── beyond-visible-spectrum-ai-for-agriculture-2026/
-│       └── Kaggle Prepared/
-│           ├── train/
-│           │   ├── HS/
-│           │   ├── MS/
-│           │   └── RGB/
-│           └── val/
-│               ├── HS/
-│               ├── MS/
-│               └── RGB/
-│
-└── src
-    ├── config
-    │   ├── config.py       #hyperparamètres 
+│   └── Kaggle_Prepared/
+│       └── train/
+│           ├── HS/
+│           ├── MS/
+│           └── RGB/
+├── results/
+│   ├── convnet/
+│   ├── resnet18/
+│   ├── resnet50/
+│   └── resnext50/
+└── src/
+    ├── config/
+    │   ├── config.py       # hyperparamètres et chemins
     │   └── __init__.py
-    ├── dataset
-    │   ├── dataset_load.py #chargement des données et transformations
+    ├── dataset/
+    │   ├── dataset_load.py # chargement des données et transformations
     │   └── __init__.py
-    ├── eval
-    │   ├── evaluate.py 
+    ├── eval/
+    │   ├── evaluate.py
     │   └── __init__.py
-    ├── main.py             #appelle les fichiers nécéssaires pour faire tourner le modèle         
-    ├── models
+    ├── models/
     │   ├── __init__.py
-    │   └── models.py       #un fichier contenant tous les modèles : Convnet, Resnet18, Resnet50 et ResneXt50
-    ├── requirements.txt
-    ├── results
-    │   ├── convnet/
-    │   ├── resnet18/
-    │   ├── resnet50/
-    │   └── resnext50/
-    └── train
-        └── train.py 
+    │   └── models.py       # ConvNet, ResNet18, ResNet50, ResNeXt50
+    ├── train/
+    │   └── train.py
+    └── requirements.txt
 
 ```
 
@@ -55,6 +49,10 @@ venv\Scripts\activate  # Windows
 
 # Installer les dépendances
 pip install -r requirements.txt
+
+# Télécharger les données depuis Kaggle :
+# https://www.kaggle.com/competitions/beyond-visible-spectrum-ai-for-agriculture-2026
+# et les placer dans data/Kaggle_Prepared/train/
 ```
 
 ##  Usage
@@ -127,6 +125,7 @@ Les hyperparamètres sont définis dans `src/config.py` :
 - Batch size : `BATCH_SIZE`
 - Early stopping : `PATIENCE_EARLY_STOPPING`
 - Scheduler : `PATIENCE_SCHEDULER`, `FACTOR_SCHEDULER`
+- Chemin des données : `PATH` dans `src/config/config.py` : seule variable à modifier selon votre machine
 
 ##  Classes
 
