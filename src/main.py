@@ -5,9 +5,9 @@ Point d'entrée principal du projet de détection de rouille jaune
 
 import argparse
 import torch
-from src.config import PATH, MODALITES, get_save_dir, get_class_names
-from train import train
-from evaluate import evaluate  
+from src.config.config import PATH, MODALITES, get_save_dir, get_class_names
+from src.train.train import train
+from src.eval.evaluate import evaluate  
 
 
 def main():
