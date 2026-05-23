@@ -146,5 +146,8 @@ marimo/_lsp/
 __marimo__/
 alexnet.pt
 
-#data
-data/
+# Ignorer le contenu de data
+data/*
+
+# Mais conserver le dossier lui-même
+!data/.gitkeep
