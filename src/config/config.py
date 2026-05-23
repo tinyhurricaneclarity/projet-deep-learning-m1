@@ -13,9 +13,6 @@ PATH = "/home/mona/Documents/Projet/beyond-visible-spectrum-ai-for-agriculture-2
 RESULTS_ROOT = Path(__file__).parent.parent.parent / "results"
 CHECKPOINTS_ROOT = Path(__file__).parent.parent.parent / "checkpoints"
 
-# Chemin par défaut des données d'entraînement
-PATH = str(DATA_ROOT / "train")
-
 # ============================================================================
 # CLASSES
 # ============================================================================
