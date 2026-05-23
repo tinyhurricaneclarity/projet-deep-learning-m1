@@ -7,16 +7,14 @@ import os
 from pathlib import Path
 
 # ============================================================================
-# CHEMINS
+# CHEMINS - SEUL PATH EST À MODIFIER SELON VOTRE MACHINE
 # ============================================================================
 
+PATH = "data/Kaggle_Prepared/train" # Modifiez ce chemin selon l'emplacement de vos données kaggle
+
 PROJECT_ROOT = Path(__file__).parent.parent.parent
-DATA_ROOT = Path("/home/mona/Documents/Projet/beyond-visible-spectrum-ai-for-agriculture-2026/Kaggle_Prepared")
 RESULTS_ROOT = PROJECT_ROOT / "results"
 CHECKPOINTS_ROOT = PROJECT_ROOT / "checkpoints"
-
-# Chemin par défaut des données d'entraînement
-PATH = str(DATA_ROOT / "train")
 
 # ============================================================================
 # CLASSES
